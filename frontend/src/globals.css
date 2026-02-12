@@ -1,0 +1,141 @@
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+
+/*
+The logic behind the colors (Mental Model)
+
+    - Base (Background): Everything that lies at the very back (background).
+    - Surface (Container): Everything on which content lies (boxes, cards, modals) -> We call all of this card.
+
+Action & Status:
+
+    - primary: Your main blue (buttons, active links).
+    - secondary: Everything that is "not as important" (cancel buttons, gray backgrounds).
+    - muted: For text that is not as important (e.g., "Created Oct 15").
+    - border: For all lines.
+*/
+
+@theme {
+	/* 1. Fonts */
+	--font-sans:
+		-apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue",
+		sans-serif;
+	--font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+	/* 2. Color Mapping (Semantic) */
+	--color-background: var(--background);
+	--color-foreground: var(--foreground);
+
+	/* Containers & Cards */
+	--color-card: var(--card);
+	--color-card-foreground: var(--card-foreground);
+
+	/* Interactions */
+	--color-primary: var(--primary);
+	--color-primary-foreground: var(--primary-foreground);
+	--color-secondary: var(--secondary);
+	--color-secondary-foreground: var(--secondary-foreground);
+
+	/* Helper Elements (Gray text, disabled elements) */
+	--color-muted: var(--muted);
+	--color-muted-foreground: var(--muted-foreground);
+
+	/* Status Colors */
+	--color-destructive: var(--destructive);
+	--color-destructive-foreground: var(--destructive-foreground);
+	--color-success: var(--success);
+	--color-success-foreground: var(--success-foreground);
+
+	/* Structure */
+	--color-border: var(--border);
+	--color-input: var(--input);
+	--color-ring: var(--ring);
+}
+
+/* 3. Base Styles & Variable Definitions */
+@layer base {
+	:root {
+		--radius: 0.5rem; /* 8px rounding, fitting the modern look */
+
+		/* --- LIGHT MODE (Clean Slate) --- */
+
+		/* Background: A very light gray/blue, not harsh white, looks more elegant */
+		--background: #f8fafc;
+		/* Text: Almost black, but softer (Slate-900) */
+		--foreground: #0f172a;
+
+		/* Cards: Pure white, so they stand out from the background */
+		--card: #ffffff;
+		--card-foreground: #0f172a;
+
+		/* Primary: Your bright blue from the screenshot */
+		--primary: #3b82f6;
+		--primary-foreground: #ffffff;
+
+		/* Secondary: Custom Slate-150 */
+		--secondary: #eaeff5;
+		--secondary-foreground: #0f172a;
+
+		/* Muted: For unimportant text like date displays (Slate-500) */
+		--muted: #f1f5f9;
+		--muted-foreground: #64748b;
+
+		/* Destructive: Red for errors/deletion */
+		--destructive: #dc143c;
+		--destructive-foreground: #ffffff;
+
+		/* Success: Green for "Complete" badges */
+		--success: #22c55e;
+		--success-foreground: #ffffff;
+
+		/* Borders: Light gray for subtle separations */
+		--border: #e2e8f0;
+		--input: #e2e8f0;
+		--ring: #3b82f6; /* Focus ring color */
+	}
+
+	.dark {
+		/* --- DARK MODE (Deep Blue/Slate) --- */
+
+		/* Background: Very dark blue/slate */
+		--background: #020617;
+		--foreground: #f8fafc;
+
+		/* Cards: A bit lighter than the background, so you can see them */
+		--card: #0f172a;
+		--card-foreground: #f8fafc;
+
+		/* Primary: Stays blue, looks good on dark */
+		--primary: #3b82f6;
+		--primary-foreground: #ffffff;
+
+		/* Secondary: Dark gray-blue for secondary elements */
+		--secondary: #1e293b;
+		--secondary-foreground: #f8fafc;
+
+		/* Muted */
+		--muted: #1e293b;
+		--muted-foreground: #94a3b8;
+
+		/* Destructive: Slightly darker red, more pleasant for dark mode */
+		--destructive: #dc143c;
+		--destructive-foreground: #f8fafc;
+
+		/* Success */
+		--success: #15803d;
+		--success-foreground: #f8fafc;
+
+		/* Borders: Dark, but visible */
+		--border: #1e293b;
+		--input: #1e293b;
+		--ring: #1d4ed8;
+	}
+
+	/* Reset Styles */
+	* {
+		@apply border-border outline-ring/50;
+	}
+	body {
+		@apply bg-background text-foreground font-sans antialiased;
+	}
+}

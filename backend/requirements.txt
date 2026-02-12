@@ -1,0 +1,12 @@
+fastapi
+uvicorn
+asyncpg
+python-dotenv
+bcrypt
+defusedxml
+python-multipart
+pydantic
+pytest
+pytest-asyncio
+httpx
+

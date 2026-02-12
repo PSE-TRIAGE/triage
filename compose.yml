@@ -1,0 +1,60 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: triage-db
+    restart: always
+    environment:
+      POSTGRES_DB: triage_database
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      APP_DB_PASSWORD: ${APP_DB_PASSWORD}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/00-init-user.sh:/docker-entrypoint-initdb.d/00-init-user.sh
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/01-init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - triage-network
+
+  backend:
+    build:
+      dockerfile: ./docker/backend.Dockerfile
+    container_name: triage-backend
+    restart: always
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: triage_database
+      DB_USER: triage_backend
+      DB_PASSWORD: ${APP_DB_PASSWORD}
+      ENVIRONMENT: ${ENVIRONMENT:-production}
+    depends_on:
+      db:
+        condition: service_healthy
+    networks:
+      - triage-network
+
+  frontend:
+    build:
+      dockerfile: ./docker/frontend.Dockerfile
+      args:
+        VITE_API_BASE_URL: ${API_BASE_URL}
+    container_name: triage-frontend
+    restart: always
+    ports:
+      - "${FRONTEND_PORT:-80}:80"
+    depends_on:
+      - backend
+    networks:
+      - triage-network
+
+volumes:
+  postgres_data:
+
+networks:
+  triage-network:
+    driver: bridge

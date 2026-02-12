@@ -1,0 +1,22 @@
+# Frontend
+node_modules
+.vite
+.vite/
+build
+dist
+dist-ssr
+.DS_Store
+*.local
+count.txt
+.env
+.nitro
+.tanstack
+.wrangler
+routeTree.gen.ts
+
+# Backend
+.env
+venv
+__pycache__
+.coverage
+.pytest_cache

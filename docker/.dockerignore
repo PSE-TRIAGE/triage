@@ -1,0 +1,25 @@
+# Backend
+backend/venv/
+backend/__pycache__/
+backend/**/__pycache__/
+backend/*.pyc
+backend/.pytest_cache/
+backend/.coverage
+backend/htmlcov/
+
+# Frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.cache/
+
+# General
+.git/
+.gitignore
+.env
+.env.local
+*.log
+.DS_Store
+README.md
+dna.txt
+dev.py
+
