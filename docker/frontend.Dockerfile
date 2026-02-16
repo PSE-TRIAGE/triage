@@ -23,4 +23,5 @@ COPY docker/selfsigned.crt /etc/nginx/certs/fullchain.pem
 COPY docker/selfsigned.key /etc/nginx/certs/privkey.pem
 COPY LICENSE /usr/share/nginx/html/LICENSE
 EXPOSE 80
+EXPOSE 443
 CMD ["nginx", "-g", "daemon off;"]
