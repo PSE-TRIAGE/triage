@@ -15,8 +15,11 @@ count.txt
 routeTree.gen.ts
 
 # Backend
-.env
 venv
 __pycache__
 .coverage
 .pytest_cache
+
+# Deployment
+.env
+certs
