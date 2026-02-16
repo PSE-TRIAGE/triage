@@ -56,7 +56,8 @@ These instructions will get a copy of the project up and running on your local m
     API_BASE_URL=/api
     ```
 
-3.  **Configure HTTPS (Optional):**
+3.  **Configure HTTPS (Optional):**  
+
     Create a `certs/` folder in the project root. Place your certificate (`fullchain.pem`) and private key (`privkey.pem`) inside.
 
     Uncomment the following line from the compose.yml file:
@@ -65,14 +66,14 @@ These instructions will get a copy of the project up and running on your local m
     ```
     
 
-3.  **Build and Run:**
+4.  **Build and Run:**
     Use Docker Compose to build the images and start the services.
     ```bash
     docker compose up -d
     ```
     * Add the `--build` flag to ensure that the backend and frontend images are built from the local source files defined in `docker/`.*
 
-4.  **Access the Application:**
+5.  **Access the Application:**
     Once the containers are running, access the web interface via your browser:
     *   **URL:** `http://localhost` (or the port specified in `FRONTEND_PORT`).
 
