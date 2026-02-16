@@ -37,29 +37,40 @@ These instructions will get a copy of the project up and running on your local m
     cp .env.example .env
     ```
 
-    Open the `.env` file and configure the necessary secrets. At a minimum, you must set the passwords:
+    Open the `.env` file and configure the necessary values:
 
     ```ini
     # Database Configuration
     DB_PASSWORD=your_super_secure_root_password
     APP_DB_PASSWORD=your_triage_backend_password
-
+    
     # Backend Configuration
     ENVIRONMENT=production
-
+    
     # Frontend Configuration
-    FRONTEND_PORT=80
-
+    HTTP_PORT=80
+    HTTPS_PORT=443
+    DOMAIN_NAME=localhost
+    
     # API URL (only change when you want to deploy the backend in a non standard way and you know what you are doing)
     API_BASE_URL=/api
     ```
 
+3.  **Configure HTTPS (Optional):**
+    Create a `certs/` folder in the project root. Place your certificate (`fullchain.pem`) and private key (`privkey.pem`) inside.
+
+    Uncomment the following line from the compose.yml file:
+    ```
+    - ./certs:/etc/nginx/certs:ro
+    ```
+    
+
 3.  **Build and Run:**
     Use Docker Compose to build the images and start the services.
     ```bash
-    docker compose up -d --build
+    docker compose up -d
     ```
-    *The `--build` flag ensures that the backend and frontend images are built from the local source files defined in `docker/`.*
+    * Add the `--build` flag to ensure that the backend and frontend images are built from the local source files defined in `docker/`.*
 
 4.  **Access the Application:**
     Once the containers are running, access the web interface via your browser:
@@ -74,12 +85,3 @@ To initialize the system, a default administrator account is created automatical
 
 > **⚠️ Security Warning:** Please log in and change the password immediately after the first deployment.
 
-## 📂 Project Structure
-
-```text
-├── backend/             # FastAPI source code, migrations, and scripts
-├── frontend/            # React/Vite source code
-├── docker/              # Dockerfiles and Nginx configuration
-├── compose.yml          # Docker Compose orchestration
-├── .env.example         # Template for environment variables
-└── README.md            # Project documentation

@@ -19,6 +19,8 @@ RUN npm run build
 FROM nginx:alpine
 COPY --from=build /app/dist /usr/share/nginx/html
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/selfsigned.crt /etc/nginx/certs/fullchain.pem
+COPY docker/selfsigned.key /etc/nginx/certs/privkey.pem
 COPY LICENSE /usr/share/nginx/html/LICENSE
 EXPOSE 80
 CMD ["nginx", "-g", "daemon off;"]
