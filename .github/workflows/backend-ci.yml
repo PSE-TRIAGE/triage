@@ -53,7 +53,7 @@ jobs:
         run: pip install -r backend/requirements.txt
 
       - name: Initialize database schema
-        run: psql -h localhost -U triage_backend -d triage_database -f backend/init.sql
+        run: psql -v ON_ERROR_STOP=1 -h localhost -U triage_backend -d triage_database -f backend/init.sql
         env:
           PGPASSWORD: password
 
