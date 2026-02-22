@@ -3,10 +3,16 @@ name: Backend CI
 on:
   push:
     branches:
-      - '**'
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
   pull_request:
     branches:
-      - '**'
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
   workflow_dispatch: # Allows manual trigger from any branch in the GitHub UI
 
 jobs:
