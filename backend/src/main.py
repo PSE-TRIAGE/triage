@@ -28,14 +28,14 @@ if DEBUG_LOGGING:
         body = b""
         if request.method in ("POST", "PUT", "PATCH"):
             body = await request.body()
-        
+
         log.info(f"{'─' * 50}")
         log.info(f"{request.method} {request.url.path}")
         log.info(f"  Query params: {dict(request.query_params)}")
         if body:
             log.info(f"  Body: {body.decode()}")
         log.info(f"  Headers: Content-Type={request.headers.get('content-type')}")
-        
+
         response = await call_next(request)
         log.info(f"  → Response: {response.status_code}")
         return response
