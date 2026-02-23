@@ -30,7 +30,6 @@ async def get_mutant(
 
 @router.get("/{mutant_id}/source", response_model=SourceCodeResponse, status_code=status.HTTP_200_OK)
 async def get_project_class_source(
-    project_id: int,
     mutant_id: int,
     user: UserResponse = Depends(get_current_user),
     mutant_service: MutantService = Depends(get_mutant_service),
