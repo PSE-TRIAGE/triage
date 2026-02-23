@@ -36,6 +36,7 @@ class TestXmlParser:
         assert mutant[8] == 10       # lineNumber
         assert mutant[9] == "MATH"
         assert mutant[10] == "com.example.FooTest.test1"
+        assert mutant[11] == "replaced math operator"  # description from child element
 
     def test_parse_empty_mutations(self):
         """Parsing XML with no mutations returns an empty list."""
@@ -167,3 +168,59 @@ class TestXmlParser:
 </mutations>"""
         result = parse_mutations(xml)
         assert result[0][1] is False
+
+    def test_parse_description_from_child_element(self):
+        """description is read from the child element, not an XML attribute."""
+        xml = b"""<?xml version="1.0" encoding="UTF-8"?>
+<mutations>
+    <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+        <sourceFile>Foo.java</sourceFile>
+        <mutatedClass>com.Foo</mutatedClass>
+        <mutatedMethod>bar</mutatedMethod>
+        <methodDescription>()V</methodDescription>
+        <lineNumber>1</lineNumber>
+        <mutator>MATH</mutator>
+        <killingTest>test</killingTest>
+        <description>changed conditional boundary</description>
+    </mutation>
+</mutations>"""
+        result = parse_mutations(xml)
+        assert result[0][11] == "changed conditional boundary"
+
+    def test_parse_description_attribute_is_not_used(self):
+        """An attribute named 'description' on the mutation element is ignored;
+        only the child element value is used."""
+        xml = b"""<?xml version="1.0" encoding="UTF-8"?>
+<mutations>
+    <mutation detected='true' status='KILLED' numberOfTestsRun='1'
+              description='this is an attribute, not the real description'>
+        <sourceFile>Foo.java</sourceFile>
+        <mutatedClass>com.Foo</mutatedClass>
+        <mutatedMethod>bar</mutatedMethod>
+        <methodDescription>()V</methodDescription>
+        <lineNumber>1</lineNumber>
+        <mutator>MATH</mutator>
+        <killingTest>test</killingTest>
+        <description>correct child element description</description>
+    </mutation>
+</mutations>"""
+        result = parse_mutations(xml)
+        assert result[0][11] == "correct child element description"
+        assert result[0][11] != "this is an attribute, not the real description"
+
+    def test_parse_missing_description_defaults_to_empty_string(self):
+        """Missing <description> child element defaults to empty string."""
+        xml = b"""<?xml version="1.0" encoding="UTF-8"?>
+<mutations>
+    <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+        <sourceFile>Foo.java</sourceFile>
+        <mutatedClass>com.Foo</mutatedClass>
+        <mutatedMethod>bar</mutatedMethod>
+        <methodDescription>()V</methodDescription>
+        <lineNumber>1</lineNumber>
+        <mutator>MATH</mutator>
+        <killingTest>test</killingTest>
+    </mutation>
+</mutations>"""
+        result = parse_mutations(xml)
+        assert result[0][11] == ""
