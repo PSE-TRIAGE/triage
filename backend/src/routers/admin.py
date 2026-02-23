@@ -1,14 +1,16 @@
 from typing import List
 import asyncio
-from fastapi import APIRouter, Depends, File, Form, UploadFile, status, HTTPException
+from fastapi import APIRouter, Depends, File, Form, UploadFile, status, HTTPException, Query, Response
 
-from dependencies import get_auth_service, get_current_admin, get_project_service, get_form_field_service
+from dependencies import get_auth_service, get_current_admin, get_project_service, get_form_field_service, get_source_code_service
 from repositories import http_responses
 from services.auth import AuthService
 from services.project import ProjectService, ProjectNameExistsError
+from services.source_code import SourceCodeService
 from services.form_field import FormFieldService
 from services import xml_parser
 from models.project import ProjectRenameRequest
+from models.source_code import SourceCodeResponse, SourceClassQuery
 from models.auth import UserResponse, RegisterRequest, ResetPasswordRequest
 from models.form_field import (
     FormFieldCreate,
@@ -205,6 +207,35 @@ async def create_project(
     await project_service.add_user(project_id, user.id)
 
     return {"id": project_id, "name": project_name}
+
+@router.put("/project/{project_id}/source", status_code=status.HTTP_201_CREATED)
+async def upload_project_source_code(
+    project_id: int,
+    file: UploadFile = File(...),
+    user: UserResponse = Depends(get_current_admin),
+    source_service: SourceCodeService = Depends(get_source_code_service)
+):
+    if not file.filename or not file.filename.endswith('.zip'):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST, 
+            detail="File must be a .zip file"
+        )
+
+    try:
+        # file.file is the standard python file interface needed by the service
+        await source_service.upload_project_source(project_id, file)
+    except ValueError as e:
+        # Catches zip bombs, invalid class names, or malicious paths
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=str(e))
+    except Exception as e:
+        # Catches IO errors or permission issues
+        print(f"Upload error: {e}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+            detail="Failed to process source code archive"
+        )
+
+    return {"detail": "Source code uploaded and extracted successfully"}
 
 
 
