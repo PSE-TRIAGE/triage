@@ -25,11 +25,11 @@ def parse_mutations(xml_bytes: bytes):
         killingTest_elem = mutation.find('killingTest')
         killingTest = killingTest_elem.text if killingTest_elem is not None and killingTest_elem.text else None
         
-        description = mutation.get('description', '')
+        description = mutation.findtext('description', '')
 
         additionalFields = {}
 
-        additionalFields_element = mutation.find('additionalFields', '')
+        additionalFields_element = mutation.find('additionalFields')
         if additionalFields_element is not None:
             for field in additionalFields_element:
                 additionalFields[field.tag] = field.text
