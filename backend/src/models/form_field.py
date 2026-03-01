@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, Literal, List
 
 
@@ -26,8 +26,7 @@ class FormFieldResponse(BaseModel):
     is_required: bool
     position: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class FormFieldValueCreate(BaseModel):
@@ -41,8 +40,7 @@ class FormFieldValueResponse(BaseModel):
     rating_id: int
     value: str
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RatingWithValuesCreate(BaseModel):
@@ -55,5 +53,4 @@ class RatingWithValuesResponse(BaseModel):
     user_id: int
     field_values: List[FormFieldValueResponse]
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)

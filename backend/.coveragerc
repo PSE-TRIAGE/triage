@@ -1,0 +1,13 @@
+[coverage:run]
+source = src
+
+[coverage:report]
+exclude_lines =
+    # Standard pragma
+    pragma: no cover
+
+    # Debug-only code
+    if DEBUG_LOGGING
+
+    # Unreachable in tests: app lifespan managed directly by test fixtures
+    async def lifespan
