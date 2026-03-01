@@ -14,6 +14,7 @@ import {useMutantStore} from "@/stores/mutantStore";
 import {getStatusBadge} from "./getStatusBadge";
 import {formatMutatorForLineBreaks} from "../utils/formatMutator";
 import {useMutantDetails} from "@/hooks/queries/useMutantQueries";
+import {SourceCodeViewer} from "./SourceCodeViewer";
 
 export function DetailPanel() {
     const selectedMutant = useMutantStore((state) => state.selectedMutant);
@@ -82,6 +83,20 @@ export function DetailPanel() {
                                     mutantDetails?.additionalFields
                                 }
                             />
+                        </CardContent>
+                    </Card>
+
+                    <Card className="flex-1 min-h-0 flex flex-col">
+                        <CardHeader className="shrink-0">
+                            <CardTitle className="text-card-foreground">
+                                Source Code
+                            </CardTitle>
+                            <CardDescription>
+                                Mutation at line {selectedMutant.lineNumber}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex-1 min-h-0 -mt-2">
+                            <SourceCodeViewer />
                         </CardContent>
                     </Card>
 
