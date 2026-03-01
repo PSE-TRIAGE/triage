@@ -119,7 +119,7 @@ export function useAddProjectUser(projectId: number) {
             const addedUser = allUsers.find((user) => user.id === userId);
 
             queryClient.setQueryData<ProjectUser[]>(
-                queryKeys.admin.projectUsers(projectId),
+                queryKeys.projects.users(projectId),
                 (oldUsers) => {
                     if (!addedUser) {
                         return oldUsers ?? [];
@@ -133,7 +133,7 @@ export function useAddProjectUser(projectId: number) {
             );
 
             queryClient.invalidateQueries({
-                queryKey: queryKeys.admin.projectUsers(projectId),
+                queryKey: queryKeys.projects.users(projectId),
             });
             queryClient.invalidateQueries({
                 queryKey: queryKeys.admin.userProjects(userId),
@@ -177,13 +177,13 @@ export function useRemoveProjectUser(projectId: number) {
 
         onSuccess: (_data, userId) => {
             queryClient.setQueryData<ProjectUser[]>(
-                queryKeys.admin.projectUsers(projectId),
+                queryKeys.projects.users(projectId),
                 (oldUsers) =>
                     (oldUsers ?? []).filter((user) => user.id !== userId),
             );
 
             queryClient.invalidateQueries({
-                queryKey: queryKeys.admin.projectUsers(projectId),
+                queryKey: queryKeys.projects.users(projectId),
             });
             queryClient.invalidateQueries({
                 queryKey: queryKeys.admin.userProjects(userId),
