@@ -14,6 +14,7 @@ ROOT_DIR = Path(__file__).resolve().parent
 BACKEND_DIR = ROOT_DIR / "backend"
 FRONTEND_DIR = ROOT_DIR / "frontend"
 DNA_FILE = ROOT_DIR / "dna.txt"
+STORAGE_DIR = BACKEND_DIR / "storage"
 
 CONTAINER_NAME = os.getenv("DEV_DB_CONTAINER", "triage-postgres")
 IMAGE = os.getenv("DEV_DB_IMAGE", "postgres:15-alpine")
@@ -268,6 +269,8 @@ def maybe_print_dna():
 def start_backend(app_db_password):
     global backend_process
 
+    STORAGE_DIR.mkdir(parents=True, exist_ok=True)
+
     env = os.environ.copy()
     env.update(
         {
@@ -276,6 +279,7 @@ def start_backend(app_db_password):
             "DB_NAME": POSTGRES_DB,
             "DB_USER": APP_DB_USER,
             "DB_PASSWORD": app_db_password,
+            "STORAGE_ROOT": str(STORAGE_DIR),
         }
     )
 
