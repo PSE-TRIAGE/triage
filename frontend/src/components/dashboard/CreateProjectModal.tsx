@@ -13,12 +13,16 @@ import {
 } from "@/components/ui/dialog";
 import {LoadingButton} from "@/components/ui/LoadingButton";
 import {FileInputGroup} from "@/components/form/FileInputGroup";
-import {useCreateProject} from "@/hooks/mutations/useProjectMutations";
+import {
+    useCreateProject,
+    useUploadSourceCode,
+} from "@/hooks/mutations/useProjectMutations";
 import {ApiError} from "@/api/client";
 
 interface CreateProjectValues {
     projectName: string;
     mutationFile: FileList;
+    sourceCodeFile: FileList;
 }
 
 interface CreateProjectModalProps {
@@ -36,9 +40,9 @@ export function CreateProjectModal({
                 <DialogHeader>
                     <DialogTitle>Create New Project</DialogTitle>
                     <DialogDescription className="text-muted-foreground">
-                        Set up a new mutation testing project. You can only
-                        upload the mutations.xml file now. Later updates of the
-                        mutations.xml file are not possible.
+                        Set up a new mutation testing project. Upload the
+                        required mutations.xml file and optionally a .zip
+                        archive with the project source code.
                     </DialogDescription>
                 </DialogHeader>
 
@@ -57,15 +61,38 @@ function CreationForm({handleClose}: {handleClose: () => void}) {
     } = useForm<CreateProjectValues>();
 
     const createProjectMutation = useCreateProject();
+    const uploadSourceMutation = useUploadSourceCode();
 
     const onSubmit = async (data: CreateProjectValues) => {
         try {
             const file = data.mutationFile[0];
 
-            await createProjectMutation.mutateAsync({
+            const project = await createProjectMutation.mutateAsync({
                 projectName: data.projectName,
                 file,
             });
+
+            const sourceFile = data.sourceCodeFile?.[0];
+            if (sourceFile) {
+                try {
+                    await uploadSourceMutation.mutateAsync({
+                        projectId: project.id,
+                        file: sourceFile,
+                    });
+                } catch (sourceError) {
+                    console.error("Source code upload failed:", sourceError);
+                    const detail =
+                        sourceError instanceof ApiError
+                            ? (sourceError.data?.detail ??
+                              "Unknown error occurred")
+                            : "Unknown error occurred";
+                    toast.warning(
+                        `Project created, but source code upload failed: ${detail}`,
+                    );
+                    handleClose();
+                    return;
+                }
+            }
 
             toast.success("Project was created successfully!");
             handleClose();
@@ -92,7 +119,10 @@ function CreationForm({handleClose}: {handleClose: () => void}) {
         }
     };
 
-    const isLoading = isSubmitting || createProjectMutation.isPending;
+    const isLoading =
+        isSubmitting ||
+        createProjectMutation.isPending ||
+        uploadSourceMutation.isPending;
 
     return (
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -125,6 +155,22 @@ function CreationForm({handleClose}: {handleClose: () => void}) {
                             isXml: (files) =>
                                 files[0]?.name.endsWith(".xml") ||
                                 "Only XML files are allowed",
+                        },
+                    })}
+                />
+
+                <FileInputGroup
+                    label="Source Code (.zip)"
+                    accept=".zip"
+                    disabled={isLoading}
+                    description="Optional: Upload project source code"
+                    error={errors?.sourceCodeFile?.message}
+                    {...register("sourceCodeFile", {
+                        validate: {
+                            isZip: (files) =>
+                                !files?.length ||
+                                files[0]?.name.endsWith(".zip") ||
+                                "Only .zip files are allowed",
                         },
                     })}
                 />

@@ -165,6 +165,7 @@ class ApiClient {
         schema: z.ZodSchema<T>,
         file: File,
         additionalData?: Record<string, string>,
+        method: "POST" | "PUT" = "POST",
     ): Promise<T> {
         const formData = new FormData();
         formData.append("file", file);
@@ -176,7 +177,7 @@ class ApiClient {
         }
 
         const response = await fetch(`${this.baseUrl}${endpoint}`, {
-            method: "POST",
+            method,
             headers: {
                 ...this.getAuthHeaders(),
             },
