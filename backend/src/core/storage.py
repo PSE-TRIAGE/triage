@@ -1,12 +1,10 @@
 import os
 from pathlib import Path
-
-# If you have this in core.config, import it. Otherwise defaults to /app/source
-STORAGE_ROOT = "/app/source"
+from .config import config
 
 class FileStorage:
-    def __init__(self, root_path: str = STORAGE_ROOT):
-        self.root_path = Path(root_path)
+    def __init__(self):
+        self.root_path = Path(config.STORAGE_ROOT)
 
     def setup(self):
         """
