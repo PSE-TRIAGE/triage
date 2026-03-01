@@ -82,6 +82,7 @@ export function DetailPanel() {
                                 additionalFields={
                                     mutantDetails?.additionalFields
                                 }
+                                description={mutantDetails?.description}
                             />
                         </CardContent>
                     </Card>
@@ -140,9 +141,11 @@ const getStatusIcon = (mutant: MutantOverview) => {
 function MutationInfoCard({
     mutant,
     additionalFields,
+    description,
 }: {
     mutant: MutantOverview;
     additionalFields?: string | null;
+    description?: string;
 }) {
     const additionalFieldEntries = useMemo(() => {
         if (!additionalFields) return [];
@@ -207,6 +210,15 @@ function MutationInfoCard({
                     </dd>
                 </div>
             </div>
+
+            {description && (
+                <div>
+                    <dt className="text-muted-foreground mb-1">Description</dt>
+                    <dd className="text-card-foreground bg-secondary px-3 py-2 rounded break-words">
+                        {description.charAt(0).toUpperCase() + description.slice(1)}
+                    </dd>
+                </div>
+            )}
 
             {additionalFieldEntries.map(([key, value]) => (
                 <div key={key}>
