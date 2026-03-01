@@ -25,3 +25,15 @@ export function useMutantDetails(mutantId?: number | null) {
         retry: 1,
     });
 }
+
+export function useMutantSourceCode(mutantId?: number | null) {
+    const {mutantsService} = useServices();
+
+    return useQuery({
+        queryKey: queryKeys.mutants.source(mutantId ?? 0),
+        queryFn: () => mutantsService.getMutantSourceCode(mutantId as number),
+        enabled: !!localStorage.getItem("auth_token") && !!mutantId,
+        staleTime: 5 * 60 * 1000,
+        retry: 1,
+    });
+}

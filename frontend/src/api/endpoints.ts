@@ -51,6 +51,7 @@ export const API_ENDPOINTS = {
     MUTANTS: {
         BY_PROJECT: "/projects/{project_id}/mutants",
         BY_ID: "/mutants/{mutant_id}",
+        SOURCE: "/mutants/{mutant_id}/source",
     },
     RATINGS: {
         GET: "/mutants/{mutant_id}/ratings",

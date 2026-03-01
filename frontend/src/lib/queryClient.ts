@@ -31,6 +31,7 @@ export const queryKeys = {
     mutants: {
         byProject: (projectId: number) => ["mutants", projectId] as const,
         byId: (mutantId: number) => ["mutants", "detail", mutantId] as const,
+        source: (mutantId: number) => ["mutants", "source", mutantId] as const,
     },
     ratings: {
         byMutant: (mutantId: number) => ["ratings", mutantId] as const,
