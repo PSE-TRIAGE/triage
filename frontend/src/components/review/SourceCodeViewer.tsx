@@ -2,10 +2,11 @@ import {FileCode, Loader2, AlertCircle, ChevronUp, ChevronDown} from "lucide-rea
 import {useMutantSourceCode} from "@/hooks/queries/useMutantQueries";
 import {useMutantStore} from "@/stores/mutantStore";
 import {ScrollArea} from "@/components/ui/scroll-area";
-import {useState, useMemo, useEffect} from "react";
+import {useState, useMemo} from "react";
 import {useTheme} from "@/components/utils/theme-provider";
 import {Highlight, themes} from "prism-react-renderer";
 import Prism from "prismjs";
+import "prismjs/components/prism-java";
 
 const INITIAL_CONTEXT = 5;
 const EXPAND_BY = 10;
@@ -26,23 +27,11 @@ const lightTheme = {
     },
 };
 
-let javaLoaded = false;
-
 export function SourceCodeViewer() {
     const selectedMutant = useMutantStore((state) => state.selectedMutant);
     const {data: sourceCode, isLoading, error} = useMutantSourceCode(selectedMutant?.id);
     const {theme} = useTheme();
     const [expandedContext, setExpandedContext] = useState({above: INITIAL_CONTEXT, below: INITIAL_CONTEXT});
-    const [isJavaLoaded, setIsJavaLoaded] = useState(javaLoaded);
-
-    useEffect(() => {
-        if (!javaLoaded) {
-            import("prismjs/components/prism-java").then(() => {
-                javaLoaded = true;
-                setIsJavaLoaded(true);
-            });
-        }
-    }, []);
 
     const prismTheme = useMemo(() => (theme === "dark" ? darkTheme : lightTheme), [theme]);
 
@@ -50,7 +39,7 @@ export function SourceCodeViewer() {
         return null;
     }
 
-    if (isLoading || !isJavaLoaded) {
+    if (isLoading) {
         return (
             <div className="flex items-center justify-center py-8 gap-2 text-muted-foreground">
                 <Loader2 className="w-4 h-4 animate-spin" />
