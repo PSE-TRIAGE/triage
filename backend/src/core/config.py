@@ -12,6 +12,6 @@ class Config:
     DB_NAME: str = os.getenv("DB_NAME", "triage_database")
     DB_USER: str = os.getenv("DB_USER", "triage_backend")
     DB_PASSWORD: str = os.getenv("DB_PASSWORD", "password")
-    STORAGE_ROOT: str = os.getenv("STORAGE_ROOT", "./storage")
+    STORAGE_ROOT: str = os.getenv("STORAGE_ROOT", "./source")
 
 config = Config()
