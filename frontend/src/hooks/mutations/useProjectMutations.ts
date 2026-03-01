@@ -19,6 +19,7 @@ export function useCreateProject() {
 
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: queryKeys.projects.all});
+            queryClient.invalidateQueries({queryKey: ["mutants", "source"]});
         },
 
         onError: (error) => {
@@ -141,6 +142,28 @@ export function useAddProjectUser(projectId: number) {
 
         onError: (error) => {
             console.error("Add user to project failed:", error);
+        },
+    });
+}
+
+type UploadSourceCodeParams = {
+    projectId: number;
+    file: File;
+};
+
+export function useUploadSourceCode() {
+    const {projectsService} = useServices();
+
+    return useMutation({
+        mutationFn: ({projectId, file}: UploadSourceCodeParams) =>
+            projectsService.uploadSourceCode(projectId, file),
+
+        onSuccess: () => {
+            queryClient.invalidateQueries({queryKey: ["mutants", "source"]});
+        },
+
+        onError: (error) => {
+            console.error("Upload source code failed:", error);
         },
     });
 }

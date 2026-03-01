@@ -8,6 +8,7 @@ export const API_ENDPOINTS = {
         CREATE_PROJECT: "/admin/projects/",
         DELETE_PROJECT: "/admin/projects/{id}",
         RENAME_PROJECT: "/admin/projects/{id}/name",
+        UPLOAD_SOURCE: "/admin/project/{project_id}/source",
         PROJECTS_LIST: "/admin/projects",
         PROJECT_USERS: {
             LIST: "/admin/projects/{project_id}/users",

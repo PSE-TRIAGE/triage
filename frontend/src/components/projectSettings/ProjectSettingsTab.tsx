@@ -1,4 +1,5 @@
 import {useState} from "react";
+import {useForm} from "react-hook-form";
 import {Button} from "../ui/button";
 import {
     Card,
@@ -21,9 +22,12 @@ import {
 } from "../ui/alert-dialog";
 import {toast} from "sonner";
 import {InputGroup} from "@/components/form/InputGroup";
+import {FileInputGroup} from "@/components/form/FileInputGroup";
+import {LoadingButton} from "@/components/ui/LoadingButton";
 import {
     useDeleteProject,
     useRenameProject,
+    useUploadSourceCode,
 } from "@/hooks/mutations/useProjectMutations";
 import {useRouteContext} from "@tanstack/react-router";
 import {ApiError} from "@/api/client";
@@ -32,6 +36,7 @@ export function ProjectSettingsTab() {
     return (
         <div className="space-y-6">
             <RenameProject />
+            <UploadSourceCode />
             <DeleteProject />
         </div>
     );
@@ -113,6 +118,83 @@ function RenameProject() {
                         {isLoading ? "Saving..." : "Save"}
                     </Button>
                 </div>
+            </CardContent>
+        </Card>
+    );
+}
+
+interface UploadSourceCodeValues {
+    sourceFile: FileList;
+}
+
+function UploadSourceCode() {
+    const {project} = useRouteContext({from: "/_auth/project/$projectId"});
+    const uploadSourceMutation = useUploadSourceCode();
+
+    const {
+        register,
+        handleSubmit,
+        reset,
+        formState: {errors},
+    } = useForm<UploadSourceCodeValues>();
+
+    const isLoading = uploadSourceMutation.isPending;
+
+    const onSubmit = async (data: UploadSourceCodeValues) => {
+        try {
+            await uploadSourceMutation.mutateAsync({
+                projectId: project.id,
+                file: data.sourceFile[0],
+            });
+            toast.success("Source code uploaded successfully!");
+            reset();
+        } catch (error) {
+            console.error("Upload source code failed:", error);
+            const detail =
+                error instanceof ApiError
+                    ? (error.data?.detail ?? "Unknown error occurred")
+                    : "Failed to upload source code";
+            toast.error(detail);
+        }
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle className="text-card-foreground">
+                    Source Code
+                </CardTitle>
+                <CardDescription className="text-muted-foreground">
+                    Upload or replace the project source code (.zip archive)
+                </CardDescription>
+            </CardHeader>
+            <CardContent>
+                <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                    <FileInputGroup
+                        label="Source Code (.zip)"
+                        accept=".zip"
+                        disabled={isLoading}
+                        showRequired={true}
+                        error={errors?.sourceFile?.message}
+                        {...register("sourceFile", {
+                            required: "Please select a .zip file",
+                            validate: {
+                                isZip: (files) =>
+                                    files[0]?.name.endsWith(".zip") ||
+                                    "Only .zip files are allowed",
+                            },
+                        })}
+                    />
+                    <LoadingButton
+                        type="submit"
+                        disabled={isLoading}
+                        loading={isLoading}
+                        loadingText="Uploading..."
+                        className="bg-primary hover:bg-primary/70"
+                    >
+                        Upload Source Code
+                    </LoadingButton>
+                </form>
             </CardContent>
         </Card>
     );

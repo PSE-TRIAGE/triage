@@ -91,6 +91,8 @@ export type Project = z.infer<typeof ProjectSchema>;
 
 const ProjectsArraySchema = z.array(ProjectSchema);
 
+const UploadSourceResponseSchema = z.object({detail: z.string()});
+
 export interface ProjectsService {
     createProject(data: CreateProjectRequest): Promise<CreateProjectResponse>;
     listProjects(): Promise<Project[]>;
@@ -103,6 +105,7 @@ export interface ProjectsService {
     listProjectUsers(projectId: number): Promise<ProjectUser[]>;
     addUserToProject(projectId: number, userId: number): Promise<void>;
     removeUserFromProject(projectId: number, userId: number): Promise<void>;
+    uploadSourceCode(projectId: number, file: File): Promise<void>;
 }
 
 export class ProjectsServiceImpl implements ProjectsService {
@@ -174,5 +177,19 @@ export class ProjectsServiceImpl implements ProjectsService {
             projectId.toString(),
         ).replace("{user_id}", userId.toString());
         return apiClient.patch(endpoint, z.void());
+    }
+
+    async uploadSourceCode(projectId: number, file: File): Promise<void> {
+        const endpoint = API_ENDPOINTS.ADMIN.UPLOAD_SOURCE.replace(
+            "{project_id}",
+            projectId.toString(),
+        );
+        await apiClient.uploadFile(
+            endpoint,
+            UploadSourceResponseSchema,
+            file,
+            undefined,
+            "PUT",
+        );
     }
 }
