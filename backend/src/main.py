@@ -4,6 +4,7 @@ from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 from core.database import db
+from core.storage import storage
 from services import auth
 from repositories import http_responses
 from routers import admin, login, projects, user, mutants, form_fields, ratings, export, algorithms
@@ -17,6 +18,7 @@ if DEBUG_LOGGING:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await db.connect()
+    storage.setup()
     yield
     await db.disconnect()
 

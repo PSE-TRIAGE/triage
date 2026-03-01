@@ -8,6 +8,7 @@ from repositories.project_repository import ProjectRepository
 from repositories.mutant_repository import MutantRepository
 from repositories.form_field_repository import FormFieldRepository
 from repositories.rating_repository import RatingRepository
+from services.source_code import SourceCodeService
 
 
 class ProjectNameExistsError(Exception):
@@ -21,12 +22,14 @@ class ProjectService:
         project_repository: ProjectRepository,
         mutant_repository: MutantRepository,
         form_field_repository: FormFieldRepository,
-        rating_repository: RatingRepository
+        rating_repository: RatingRepository,
+        source_code_service: SourceCodeService
     ):
         self.project_repo = project_repository
         self.mutant_repo = mutant_repository
         self.form_field_repo = form_field_repository
         self.rating_repo = rating_repository
+        self.source_code_service = source_code_service
 
     async def create(self, project_name: str, mutants: List[list]) -> int:
         """Create a new project with mutants.
@@ -49,6 +52,7 @@ class ProjectService:
             raise ProjectNameExistsError(f"Project with name '{project_name}' already exists")
 
     async def delete(self, project_id: int):
+        await self.source_code_service.delete_source_folder(project_id)
         await self.project_repo.delete(project_id)
 
     async def rename(self, project_id: int, name: str) -> None:

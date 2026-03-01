@@ -1,6 +1,7 @@
 from fastapi import Request
 
 from core.database import db
+from core.storage import storage
 from repositories.user_repository import UserRepository
 from repositories.session_repository import SessionRepository
 from repositories.project_repository import ProjectRepository
@@ -9,6 +10,8 @@ from repositories.form_field_repository import FormFieldRepository
 from repositories.form_field_value_repository import FormFieldValueRepository
 from repositories.rating_repository import RatingRepository
 from repositories.export_repository import ExportRepository
+from repositories.source_code_repository import SourceCodeRepository
+from services.source_code import SourceCodeService
 from services.auth import AuthService
 from services.project import ProjectService
 from services.mutant import MutantService
@@ -50,6 +53,9 @@ def get_rating_repository() -> RatingRepository:
 
 def get_export_repository() -> ExportRepository:
     return ExportRepository(db)
+
+def get_source_code_repository() -> SourceCodeRepository:
+    return SourceCodeRepository(storage)
 
 
 # Service factories
@@ -98,6 +104,20 @@ def get_algorithm_service() -> AlgorithmService:
     return AlgorithmService(
         mutant_repository=get_mutant_repository(),
         project_repository=get_project_repository()
+    )
+
+def get_source_code_service() -> SourceCodeService:
+    return SourceCodeService(
+        repository=get_source_code_repository()
+    )
+
+def get_project_service() -> ProjectService:
+    return ProjectService(
+        project_repository=get_project_repository(),
+        mutant_repository=get_mutant_repository(),
+        form_field_repository=get_form_field_repository(),
+        rating_repository=get_rating_repository(),
+        source_code_service=get_source_code_service() 
     )
 
 
