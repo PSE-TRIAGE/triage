@@ -9,9 +9,11 @@ import type {
     Project,
     ProjectUser,
 } from "@/api/services/projects.service";
+import {useMutantStore} from "@/stores/mutantStore";
 
 export function useCreateProject() {
     const {projectsService} = useServices();
+    const clearMutantStore = useMutantStore.getState();
 
     return useMutation({
         mutationFn: (data: CreateProjectRequest) =>
@@ -20,6 +22,12 @@ export function useCreateProject() {
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: queryKeys.projects.all});
             queryClient.invalidateQueries({queryKey: ["mutants", "source"]});
+
+            clearMutantStore.setProjectId(null);
+            clearMutantStore.setMutants([]);
+            clearMutantStore.setSelectedMutant(null);
+
+            queryClient.invalidateQueries({queryKey: ["mutants"]});
         },
 
         onError: (error) => {
@@ -31,6 +39,7 @@ export function useCreateProject() {
 export function useDeleteProject() {
     const {projectsService} = useServices();
     const navigate = useNavigate();
+    const clearMutantStore = useMutantStore.getState();
 
     return useMutation({
         mutationFn: (projectId: number) =>
@@ -45,6 +54,12 @@ export function useDeleteProject() {
             );
 
             queryClient.invalidateQueries({queryKey: queryKeys.projects.all});
+
+            clearMutantStore.setProjectId(null);
+            clearMutantStore.setMutants([]);
+            clearMutantStore.setSelectedMutant(null);
+
+            queryClient.invalidateQueries({queryKey: ["mutants"]});
 
             toast.success("Project deleted successfully");
             navigate({to: "/dashboard"});

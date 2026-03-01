@@ -39,7 +39,9 @@ export function ReviewView() {
 
     React.useEffect(() => {
         setProjectId(projectId);
-    }, [projectId, setProjectId]);
+        setMutants([]);
+        setSelectedMutant(null);
+    }, [projectId, setProjectId, setMutants, setSelectedMutant]);
 
     React.useEffect(() => {
         setIsLoading(isLoading);
