@@ -1,11 +1,14 @@
 import pytest
+import uuid
 from unittest.mock import AsyncMock
 from httpx import AsyncClient
+from io import BytesIO
 
 from main import app
 from dependencies import get_current_admin, get_current_user, get_form_field_service
 from models.auth import UserResponse
 from models.form_field import FormFieldResponse
+from .conftest import TEST_ADMIN_USERNAME, TEST_ADMIN_PASSWORD
 
 
 FAKE_ADMIN = UserResponse(id=1, username="admin", is_admin=True, is_active=True)
@@ -321,3 +324,138 @@ class TestFormFields:
             assert response.status_code == 401
         finally:
             app.dependency_overrides.clear()
+
+
+class TestFormFieldsIntegration:
+    """Integration tests for form field endpoints using a real database."""
+
+    async def _get_admin_token(self, client: AsyncClient) -> str:
+        response = await client.post(
+            "/api/login",
+            json={"username": TEST_ADMIN_USERNAME, "password": TEST_ADMIN_PASSWORD}
+        )
+        return response.json()["token"]
+
+    async def _create_test_project(self, client: AsyncClient, token: str, name: str) -> int:
+        unique_name = f"{name}_{uuid.uuid4().hex[:8]}"
+        xml_content = b"""<?xml version="1.0" encoding="UTF-8"?>
+<mutations>
+    <mutation detected='true' status='KILLED' numberOfTestsRun='1'>
+        <sourceFile>Test.java</sourceFile>
+        <mutatedClass>com.Test</mutatedClass>
+        <mutatedMethod>run</mutatedMethod>
+        <methodDescription>()V</methodDescription>
+        <lineNumber>1</lineNumber>
+        <mutator>MATH</mutator>
+        <killingTest>com.TestTest.test1</killingTest>
+        <description>test</description>
+    </mutation>
+</mutations>"""
+        response = await client.post(
+            "/api/admin/projects/",
+            headers={"Authorization": f"Bearer {token}"},
+            data={"project_name": unique_name},
+            files={"file": ("mutations.xml", BytesIO(xml_content), "application/xml")}
+        )
+        assert response.status_code == 201
+        return response.json()["id"]
+
+    @pytest.mark.asyncio
+    async def test_create_get_update_delete_form_field(self, client: AsyncClient):
+        """Full CRUD lifecycle for a form field."""
+        token = await self._get_admin_token(client)
+        project_id = await self._create_test_project(client, token, "ff_crud_int")
+
+        # Create a new form field
+        create_response = await client.post(
+            f"/api/admin/projects/{project_id}/form-fields",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"label": "Severity", "type": "rating", "is_required": True}
+        )
+        assert create_response.status_code == 201
+        field = create_response.json()
+        field_id = field["id"]
+        assert field["label"] == "Severity"
+        assert field["type"] == "rating"
+        assert field["is_required"] is True
+
+        # Get the single form field
+        get_response = await client.get(
+            f"/api/projects/{project_id}/form-fields/{field_id}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        assert get_response.status_code == 200
+        assert get_response.json()["id"] == field_id
+        assert get_response.json()["label"] == "Severity"
+
+        # Update the form field
+        update_response = await client.put(
+            f"/api/admin/projects/{project_id}/form-fields/{field_id}",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"label": "Severity Level", "is_required": False}
+        )
+        assert update_response.status_code == 200
+        assert update_response.json()["label"] == "Severity Level"
+        assert update_response.json()["is_required"] is False
+
+        # Delete the form field
+        delete_response = await client.delete(
+            f"/api/admin/projects/{project_id}/form-fields/{field_id}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        assert delete_response.status_code == 200
+
+        # Verify deleted — get single field returns 404
+        get_after_delete = await client.get(
+            f"/api/projects/{project_id}/form-fields/{field_id}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        assert get_after_delete.status_code == 404
+
+        await client.delete(
+            f"/api/admin/projects/{project_id}",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+
+    @pytest.mark.asyncio
+    async def test_reorder_form_fields(self, client: AsyncClient):
+        """Reordering form fields updates their positions correctly."""
+        token = await self._get_admin_token(client)
+        project_id = await self._create_test_project(client, token, "ff_reorder_int")
+
+        # Project already has a default "Rating" field; add two more
+        await client.post(
+            f"/api/admin/projects/{project_id}/form-fields",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"label": "Notes", "type": "text", "is_required": False}
+        )
+        await client.post(
+            f"/api/admin/projects/{project_id}/form-fields",
+            headers={"Authorization": f"Bearer {token}"},
+            json={"label": "Score", "type": "integer", "is_required": True}
+        )
+
+        # Get all fields to know current IDs and positions
+        all_fields_response = await client.get(
+            f"/api/projects/{project_id}/form-fields",
+            headers={"Authorization": f"Bearer {token}"}
+        )
+        fields = all_fields_response.json()
+        assert len(fields) == 3
+        ids_in_order = [f["id"] for f in fields]
+
+        # Reorder: reverse the order
+        reversed_ids = list(reversed(ids_in_order))
+        reorder_response = await client.patch(
+            f"/api/admin/projects/{project_id}/form-fields/reorder",
+            headers={"Authorization": f"Bearer {token}"},
+            json=reversed_ids
+        )
+        assert reorder_response.status_code == 200
+        reordered = reorder_response.json()
+        assert [f["id"] for f in reordered] == reversed_ids
+
+        await client.delete(
+            f"/api/admin/projects/{project_id}",
+            headers={"Authorization": f"Bearer {token}"}
+        )

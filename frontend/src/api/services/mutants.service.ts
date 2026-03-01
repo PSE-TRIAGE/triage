@@ -91,9 +91,26 @@ const MutantDetailSchema = z
 
 export type MutantDetail = z.infer<typeof MutantDetailSchema>;
 
+const SourceCodeSchema = z
+    .object({
+        project_id: z.number(),
+        fully_qualified_name: z.string(),
+        content: z.string().nullable(),
+        found: z.boolean(),
+    })
+    .transform((data) => ({
+        projectId: data.project_id,
+        fullyQualifiedName: data.fully_qualified_name,
+        content: data.content,
+        found: data.found,
+    }));
+
+export type SourceCode = z.infer<typeof SourceCodeSchema>;
+
 export interface MutantsService {
     listProjectMutants(projectId: number): Promise<MutantOverview[]>;
     getMutant(mutantId: number): Promise<MutantDetail>;
+    getMutantSourceCode(mutantId: number): Promise<SourceCode>;
 }
 
 export class MutantsServiceImpl implements MutantsService {
@@ -111,5 +128,13 @@ export class MutantsServiceImpl implements MutantsService {
             mutantId.toString(),
         );
         return apiClient.get(endpoint, MutantDetailSchema);
+    }
+
+    async getMutantSourceCode(mutantId: number): Promise<SourceCode> {
+        const endpoint = API_ENDPOINTS.MUTANTS.SOURCE.replace(
+            "{mutant_id}",
+            mutantId.toString(),
+        );
+        return apiClient.get(endpoint, SourceCodeSchema);
     }
 }

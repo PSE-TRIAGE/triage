@@ -42,7 +42,7 @@ class MutantRepository:
                 "SELECT * FROM mutants WHERE id = $1",
                 mutant_id
             )
-            return dict(mutant)
+            return dict(mutant) if mutant is not None else None
 
     async def get_all_for_ranking(self, project_id: int) -> List[dict]:
         """Get all mutants for a project with fields needed for ranking."""

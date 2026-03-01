@@ -14,6 +14,7 @@ import {useMutantStore} from "@/stores/mutantStore";
 import {getStatusBadge} from "./getStatusBadge";
 import {formatMutatorForLineBreaks} from "../utils/formatMutator";
 import {useMutantDetails} from "@/hooks/queries/useMutantQueries";
+import {SourceCodeViewer} from "./SourceCodeViewer";
 
 export function DetailPanel() {
     const selectedMutant = useMutantStore((state) => state.selectedMutant);
@@ -81,7 +82,22 @@ export function DetailPanel() {
                                 additionalFields={
                                     mutantDetails?.additionalFields
                                 }
+                                description={mutantDetails?.description}
                             />
+                        </CardContent>
+                    </Card>
+
+                    <Card className="flex-1 min-h-0 flex flex-col">
+                        <CardHeader className="shrink-0">
+                            <CardTitle className="text-card-foreground">
+                                Source Code
+                            </CardTitle>
+                            <CardDescription>
+                                Mutation at line {selectedMutant.lineNumber}
+                            </CardDescription>
+                        </CardHeader>
+                        <CardContent className="flex-1 min-h-0 -mt-2">
+                            <SourceCodeViewer />
                         </CardContent>
                     </Card>
 
@@ -125,9 +141,11 @@ const getStatusIcon = (mutant: MutantOverview) => {
 function MutationInfoCard({
     mutant,
     additionalFields,
+    description,
 }: {
     mutant: MutantOverview;
     additionalFields?: string | null;
+    description?: string;
 }) {
     const additionalFieldEntries = useMemo(() => {
         if (!additionalFields) return [];
@@ -192,6 +210,15 @@ function MutationInfoCard({
                     </dd>
                 </div>
             </div>
+
+            {description && (
+                <div>
+                    <dt className="text-muted-foreground mb-1">Description</dt>
+                    <dd className="text-card-foreground bg-secondary px-3 py-2 rounded break-words">
+                        {description.charAt(0).toUpperCase() + description.slice(1)}
+                    </dd>
+                </div>
+            )}
 
             {additionalFieldEntries.map(([key, value]) => (
                 <div key={key}>

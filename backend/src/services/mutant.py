@@ -3,6 +3,7 @@ from repositories.project_repository import ProjectRepository
 from repositories.mutant_repository import MutantRepository
 from repositories.form_field_repository import FormFieldRepository
 from repositories.rating_repository import RatingRepository
+from repositories.http_responses import MUTANT_NOT_FOUND
 
 class MutantService:
     def __init__(
@@ -19,6 +20,8 @@ class MutantService:
 
     async def get(self, mutant_id):
         mutant = await self.mutant_repo.get_mutant(mutant_id)
+        if mutant is None:
+            raise MUTANT_NOT_FOUND
         return MutantResponse(
             id=mutant['id'],
             project_id=mutant['project_id'],

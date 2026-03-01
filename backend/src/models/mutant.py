@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, Literal
 
 
@@ -19,8 +19,7 @@ class MutantResponse(BaseModel):
     ranking: int
     additionalFields: dict | None
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class MutantOverviewResponse(BaseModel):
@@ -33,8 +32,7 @@ class MutantOverviewResponse(BaseModel):
     ranking: int
     rated: bool
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class RatingRequest(BaseModel):
@@ -48,5 +46,4 @@ class RatingResponse(BaseModel):
     user_id: int
     rating: int
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
