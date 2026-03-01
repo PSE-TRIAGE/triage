@@ -46,7 +46,9 @@ export function MutationListPanel() {
         all: () => true,
     };
 
-    const filteredMutants = mutants.filter(filterFns[filter]);
+    const filteredMutants = mutants
+        .filter(filterFns[filter])
+        .sort((a, b) => a.ranking - b.ranking);
 
     return (
         <Card className="h-full min-h-0">
