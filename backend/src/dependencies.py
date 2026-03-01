@@ -117,7 +117,6 @@ def get_project_service() -> ProjectService:
         mutant_repository=get_mutant_repository(),
         form_field_repository=get_form_field_repository(),
         rating_repository=get_rating_repository(),
-        # Inject source service here so we can delete files when deleting a project
         source_code_service=get_source_code_service() 
     )
 
