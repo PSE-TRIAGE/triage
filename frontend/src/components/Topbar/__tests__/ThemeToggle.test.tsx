@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
-import { ThemeProvider, useTheme } from "@/components/utils/theme-provider";
+import { render, screen } from "@testing-library/react";
+import { ThemeProvider } from "@/components/utils/theme-provider";
 import { ThemeToggle } from "../ThemeToggle";
 
 function renderThemeToggle(defaultTheme: "dark" | "light" = "dark") {
