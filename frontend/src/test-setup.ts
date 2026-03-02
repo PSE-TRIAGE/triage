@@ -24,17 +24,12 @@ const localStorageMock = (() => {
 Object.defineProperty(window, "localStorage", { value: localStorageMock });
 
 // Mock window.location
-const locationMock = {
+vi.stubGlobal("location", {
 	href: "",
 	pathname: "/",
 	assign: vi.fn(),
 	replace: vi.fn(),
 	reload: vi.fn(),
-	includes: vi.fn(),
-};
-Object.defineProperty(window, "location", {
-	value: locationMock,
-	writable: true,
 });
 
 // Mock URL.createObjectURL / revokeObjectURL
