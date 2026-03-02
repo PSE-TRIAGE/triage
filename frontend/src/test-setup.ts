@@ -6,9 +6,6 @@ afterEach(() => {
 	cleanup();
 });
 
-// Mock import.meta.env
-vi.stubGlobal("import", { meta: { env: { VITE_API_BASE_URL: "http://localhost:8000/api" } } });
-
 // Mock localStorage
 const localStorageMock = (() => {
 	let store: Record<string, string> = {};
