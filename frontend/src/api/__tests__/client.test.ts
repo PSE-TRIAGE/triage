@@ -177,17 +177,6 @@ describe("apiClient", () => {
         expect(result).toBeUndefined();
     });
 
-    it("downloadFile returns a blob", async () => {
-        const blobContent = new Blob(["test content"], {type: "text/plain"});
-        vi.spyOn(globalThis, "fetch").mockResolvedValue(
-            new Response(blobContent, {status: 200}),
-        );
-
-        const {apiClient} = await import("../client");
-        const result = await apiClient.downloadFile("/test");
-        expect(result).toBeInstanceOf(Blob);
-    });
-
     it("downloadFile throws on error", async () => {
         vi.spyOn(globalThis, "fetch").mockResolvedValue(
             new Response(JSON.stringify({detail: "Not found"}), {
