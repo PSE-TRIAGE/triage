@@ -51,6 +51,7 @@ export function StarRatingInputGroup({
                         <button
                             key={`star-${starValue}`}
                             type="button" // imporatant: not to submit the form
+                            aria-label={`${starValue} star-button`}
                             disabled={disabled}
                             onClick={() => onValueChange(starValue)}
                             onMouseEnter={() =>
