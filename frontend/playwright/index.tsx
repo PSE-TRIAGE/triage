@@ -12,6 +12,7 @@ import {
 import { createMockServices } from "@/ui-tests/pw-test-utils";
 import { useMutantStore } from "@/stores/mutantStore";
 import type { Services } from "@/lib/services";
+import { ApiError } from "@/api/client";
 
 export type HooksConfig = {
   admin?: boolean;
@@ -80,7 +81,7 @@ beforeMount<HooksConfig>(async ({ App, hooksConfig }) => {
     }),
     login: hooksConfig?.loginFail
       ? (async () => {
-          throw { status: 401 };
+          throw new ApiError(401, "login unsuccessful"); 
         })
       : async () => ({ token: "mock-token" }),
     logout: async () => {},
