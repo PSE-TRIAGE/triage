@@ -1,5 +1,6 @@
 # Frontend
 node_modules
+coverage/
 .vite
 .vite/
 build
@@ -15,9 +16,9 @@ count.txt
 routeTree.gen.ts
 
 # Playwright
-test-results/
-playwright-report/
-playwright/.cache/
+frontend/test-results/
+frontend/playwright-report/
+frontend/playwright/.cache/
 .tmp/
 
 # Backend
