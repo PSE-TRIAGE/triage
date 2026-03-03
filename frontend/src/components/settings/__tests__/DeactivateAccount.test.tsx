@@ -1,5 +1,5 @@
 import {describe, expect, it, vi} from "vitest";
-import {render, screen} from "@testing-library/react";
+import {screen} from "@testing-library/react";
 import {DeactivateAccount} from "../DeactivateAccount";
 import {renderWithProviders} from "@/test-utils";
 
