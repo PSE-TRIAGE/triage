@@ -1,8 +1,11 @@
 import {useMutation} from "@tanstack/react-query";
 import {toast} from "sonner";
-import {queryClient, queryKeys} from "@/lib/queryClient";
 import {useServices} from "@/api/ServiceProvider";
-import type {CreateUserRequest, AdminUser} from "@/api/services/admin-users.service";
+import type {
+    AdminUser,
+    CreateUserRequest,
+} from "@/api/services/admin-users.service";
+import {queryClient, queryKeys} from "@/lib/queryClient";
 
 type ChangeRoleParams = {
     userId: number;
@@ -13,7 +16,8 @@ export function useAdminCreateUser() {
     const {adminUsersService} = useServices();
 
     return useMutation({
-        mutationFn: (data: CreateUserRequest) => adminUsersService.createUser(data),
+        mutationFn: (data: CreateUserRequest) =>
+            adminUsersService.createUser(data),
 
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: queryKeys.admin.users});
@@ -61,9 +65,7 @@ export function useAdminDisableUser() {
                 queryKeys.admin.users,
                 (oldUsers) =>
                     oldUsers?.map((user) =>
-                        user.id === userId
-                            ? {...user, isActive: false}
-                            : user,
+                        user.id === userId ? {...user, isActive: false} : user,
                     ),
             );
             queryClient.invalidateQueries({queryKey: queryKeys.admin.users});
@@ -88,9 +90,7 @@ export function useAdminEnableUser() {
                 queryKeys.admin.users,
                 (oldUsers) =>
                     oldUsers?.map((user) =>
-                        user.id === userId
-                            ? {...user, isActive: true}
-                            : user,
+                        user.id === userId ? {...user, isActive: true} : user,
                     ),
             );
             queryClient.invalidateQueries({queryKey: queryKeys.admin.users});
@@ -115,7 +115,9 @@ export function useAdminChangeRole() {
 
         onSuccess: (_data, {promote}) => {
             queryClient.invalidateQueries({queryKey: queryKeys.admin.users});
-            toast.success(`User ${promote ? "promoted to admin" : "demoted to member"}`);
+            toast.success(
+                `User ${promote ? "promoted to admin" : "demoted to member"}`,
+            );
         },
 
         onError: (error) => {

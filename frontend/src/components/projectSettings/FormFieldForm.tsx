@@ -1,9 +1,15 @@
 import {useId} from "react";
 import {Controller, useForm} from "react-hook-form";
-
-import {Button} from "../ui/button";
-import {LoadingButton} from "../ui/LoadingButton";
+import type {FieldType} from "@/api/services/admin-formfield.service";
 import {InputGroup} from "../form/InputGroup";
+import {Button} from "../ui/button";
+import {
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "../ui/dialog";
+import {LoadingButton} from "../ui/LoadingButton";
 import {Label} from "../ui/label";
 import {
     Select,
@@ -12,13 +18,6 @@ import {
     SelectTrigger,
     SelectValue,
 } from "../ui/select";
-import {
-    DialogDescription,
-    DialogFooter,
-    DialogHeader,
-    DialogTitle,
-} from "../ui/dialog";
-import type {FieldType} from "@/api/services/admin-formfield.service";
 
 const FIELD_TYPES = [
     {value: "rating", label: "Rating"},

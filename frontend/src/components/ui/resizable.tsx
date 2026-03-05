@@ -1,5 +1,5 @@
-import * as React from "react";
 import {GripVerticalIcon} from "lucide-react";
+import type * as React from "react";
 import {Panel, PanelGroup, PanelResizeHandle} from "react-resizable-panels";
 
 import {cn} from "@/lib/utils";

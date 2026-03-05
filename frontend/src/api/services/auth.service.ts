@@ -1,6 +1,6 @@
+import {z} from "zod";
 import {apiClient} from "../client";
 import {API_ENDPOINTS} from "../endpoints";
-import {z} from "zod";
 
 export type LoginCredentials = {
     username: string;

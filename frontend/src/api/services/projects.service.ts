@@ -1,6 +1,6 @@
+import {z} from "zod";
 import {apiClient} from "../client";
 import {API_ENDPOINTS} from "../endpoints";
-import {z} from "zod";
 
 export type CreateProjectRequest = {
     projectName: string;
@@ -28,9 +28,7 @@ export type AdminProject = z.infer<typeof AdminProjectSchema>;
 const AdminProjectsArraySchema = z.array(AdminProjectSchema);
 const RenameProjectResponseSchema = AdminProjectSchema;
 
-export type RenameProjectResponse = z.infer<
-    typeof RenameProjectResponseSchema
->;
+export type RenameProjectResponse = z.infer<typeof RenameProjectResponseSchema>;
 
 const ProjectUserSchema = z
     .object({

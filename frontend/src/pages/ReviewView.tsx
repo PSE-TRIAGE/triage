@@ -1,19 +1,19 @@
-import {MutationListPanel} from "@/components/review/MutationListPanel";
-import {DetailPanel} from "@/components/review/DetailPanel";
-import {ReviewFormPanel} from "@/components/review/ReviewFormPanel";
+import {useNavigate} from "@tanstack/react-router";
 import {AlertTriangle, ArrowLeft, Loader2} from "lucide-react";
+import React from "react";
+import {DetailPanel} from "@/components/review/DetailPanel";
+import {MutationListPanel} from "@/components/review/MutationListPanel";
+import {ReviewFormPanel} from "@/components/review/ReviewFormPanel";
+import {Button} from "@/components/ui/button";
 import {
     ResizableHandle,
     ResizablePanel,
     ResizablePanelGroup,
 } from "@/components/ui/resizable";
-import {Button} from "@/components/ui/button";
-import {useNavigate} from "@tanstack/react-router";
-import {useMutantStore} from "@/stores/mutantStore";
-import React from "react";
-import {useProjectMutants} from "@/hooks/queries/useMutantQueries";
 import {useFormFields} from "@/hooks/queries/useFormFieldQueries";
+import {useProjectMutants} from "@/hooks/queries/useMutantQueries";
 import {Route} from "@/routes/_auth/project/$projectId/review";
+import {useMutantStore} from "@/stores/mutantStore";
 
 export function ReviewView() {
     const {project} = Route.useRouteContext();

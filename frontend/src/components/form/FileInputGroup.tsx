@@ -1,7 +1,7 @@
-import {forwardRef, useId, useState} from "react";
-import {Label} from "../ui/label";
 import {Upload} from "lucide-react";
+import {forwardRef, useId, useState} from "react";
 import {Input} from "../ui/input";
+import {Label} from "../ui/label";
 
 export interface FileInputProps
     extends React.InputHTMLAttributes<HTMLInputElement> {

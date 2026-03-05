@@ -1,6 +1,6 @@
+import {Separator} from "@radix-ui/react-menu";
 import {DeactivateAccount} from "@/components/settings/DeactivateAccount";
 import {ProfileDataManagement} from "@/components/settings/ProfileDataManagement";
-import {Separator} from "@radix-ui/react-menu";
 
 export function Settings() {
     return (

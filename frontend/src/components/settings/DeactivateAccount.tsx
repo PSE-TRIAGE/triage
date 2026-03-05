@@ -87,7 +87,9 @@ export function DeactivateAccount() {
                                 </AlertDialogCancel>
                                 <AlertDialogAction
                                     onClick={handleDeactivateAccount}
-                                    disabled={deactivateAccountRequest.isPending}
+                                    disabled={
+                                        deactivateAccountRequest.isPending
+                                    }
                                     className="cursor-pointer bg-destructive hover:bg-destructive/70 text-destructive-foreground"
                                 >
                                     {deactivateAccountRequest.isPending

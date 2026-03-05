@@ -1,17 +1,15 @@
+import {useEffect} from "react";
+import {Controller, useForm} from "react-hook-form";
 import type {FormField} from "@/api/services/admin-formfield.service";
 import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card";
-import {Controller, useForm} from "react-hook-form";
-import {useEffect} from "react";
-
-import {InputGroup} from "../form/InputGroup";
-import {TextareaInputGroup} from "../form/TextareaInputGroup";
-import {CheckBoxInputGroup} from "../form/CheckBoxInputGroup";
-import {StarRatingInputGroup} from "../form/StarRatingInputGroup";
-import {LoadingButton} from "../ui/LoadingButton";
-
-import {useMutantStore} from "@/stores/mutantStore";
-import {useRating} from "@/hooks/queries/useRatingQueries";
 import {useSubmitRating} from "@/hooks/mutations/useRatingMutations";
+import {useRating} from "@/hooks/queries/useRatingQueries";
+import {useMutantStore} from "@/stores/mutantStore";
+import {CheckBoxInputGroup} from "../form/CheckBoxInputGroup";
+import {InputGroup} from "../form/InputGroup";
+import {StarRatingInputGroup} from "../form/StarRatingInputGroup";
+import {TextareaInputGroup} from "../form/TextareaInputGroup";
+import {LoadingButton} from "../ui/LoadingButton";
 
 interface ReviewFormValues {
     [key: string]: string | number | boolean;
@@ -26,19 +24,12 @@ function getEmptyFormValues(formFields: FormField[]): ReviewFormValues {
     const values: ReviewFormValues = {};
     formFields.forEach((field) => {
         const key = field.id.toString();
-        switch (field.type) {
-            case "checkbox":
-                values[key] = false;
-                break;
-            case "integer":
-            case "rating":
-                values[key] = "";
-                break;
-            case "text":
-            default:
-                values[key] = "";
-                break;
+        if (field.type === "checkbox") {
+            values[key] = false;
+            return;
         }
+
+        values[key] = "";
     });
     return values;
 }

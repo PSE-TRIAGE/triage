@@ -1,3 +1,4 @@
+import type {AdminUser} from "@/api/services/admin-users.service";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -8,7 +9,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type {AdminUser} from "@/api/services/admin-users.service";
 import {useAdminEnableUser} from "@/hooks/mutations/useAdminMutations";
 
 type ReactivateUserDialogProps = {

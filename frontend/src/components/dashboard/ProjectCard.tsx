@@ -1,4 +1,8 @@
+import {useNavigate} from "@tanstack/react-router";
+import {Calendar, Check, Play, Settings, TrendingUp} from "lucide-react";
 import type {Project} from "@/api/services/projects.service";
+import {Badge} from "@/components/ui/badge";
+import {Button} from "@/components/ui/button";
 import {
     Card,
     CardContent,
@@ -7,10 +11,6 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import {Progress} from "@/components/ui/progress";
-import {Button} from "@/components/ui/button";
-import {Settings, Play, Calendar, TrendingUp, Check} from "lucide-react";
-import {Badge} from "@/components/ui/badge";
-import {useNavigate} from "@tanstack/react-router";
 import {useMe} from "@/hooks/queries/useUserQueries";
 
 export function ProjectCard({project}: {project: Project}) {

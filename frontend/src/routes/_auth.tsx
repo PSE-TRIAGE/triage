@@ -1,7 +1,6 @@
 import {createFileRoute, Outlet, redirect} from "@tanstack/react-router";
-
-import {Toaster} from "@/components/utils/Toaster";
 import {GlobalHeader} from "@/components/Topbar/GlobalHeader";
+import {Toaster} from "@/components/utils/Toaster";
 import {queryClient, queryKeys} from "@/lib/queryClient";
 import {services} from "@/lib/services";
 

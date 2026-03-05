@@ -1,5 +1,6 @@
 import {useForm} from "react-hook-form";
-
+import {toast} from "sonner";
+import {ApiError} from "@/api/client";
 import {InputGroup} from "@/components/form/InputGroup";
 import {
     Card,
@@ -8,13 +9,11 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {toast} from "sonner";
 import {LoadingButton} from "@/components/ui/LoadingButton";
 import {
     useChangePassword,
     useChangeUsername,
 } from "@/hooks/mutations/useAuthMutations";
-import {ApiError} from "@/api/client";
 import {useMe} from "@/hooks/queries/useUserQueries";
 
 export interface ProfileFormValues {
