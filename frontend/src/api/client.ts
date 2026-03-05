@@ -1,6 +1,4 @@
-import type {z} from "zod";
-
-const API_BASE_URL =
+import type {z} from "zod";const API_BASE_URL =
     import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api";
 
 export interface ApiErrorResponse {
@@ -21,7 +19,6 @@ export class ApiError extends Error {
 
 class ApiClient {
     constructor(private baseUrl: string) {}
-
     private getAuthHeaders(): HeadersInit {
         const token = localStorage.getItem("auth_token");
         return {
