@@ -1,7 +1,7 @@
-import {Dna, LogOut, Settings, User as UserIcon} from "lucide-react";
-
 import {useNavigate} from "@tanstack/react-router";
-
+import {Dna, FolderOpen, LogOut, Settings, Users} from "lucide-react";
+import {useLogout} from "@/hooks/mutations/useAuthMutations";
+import {useMe} from "@/hooks/queries/useUserQueries";
 import {Button} from "../ui/button";
 import {
     DropdownMenu,
@@ -12,8 +12,6 @@ import {
     DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import {ThemeToggle} from "./ThemeToggle";
-import {useLogout} from "@/hooks/mutations/useAuthMutations";
-import {useMe} from "@/hooks/queries/useUserQueries";
 
 export function GlobalHeader() {
     return (
@@ -21,6 +19,7 @@ export function GlobalHeader() {
             <div className="flex items-center justify-between h-16 px-6">
                 <AppLogo />
                 <div className="flex items-center gap-2">
+                    <HeaderActions />
                     <ProfileDropdown />
                 </div>
             </div>
@@ -50,6 +49,37 @@ const AppLogo = () => {
     );
 };
 
+const HeaderActions = () => {
+    const navigate = useNavigate();
+    const {data: user} = useMe();
+
+    return (
+        <div className="flex items-center gap-1">
+            <Button
+                variant="outline"
+                size="sm"
+                onClick={() => navigate({to: "/dashboard"})}
+                className="gap-2 border-border/90 bg-card hover:bg-secondary hover:border-primary/50"
+            >
+                <FolderOpen className="h-4 w-4" />
+                <span>Projects</span>
+            </Button>
+
+            {user?.isAdmin && (
+                <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => navigate({to: "/user-management"})}
+                    className="gap-2 border-border/90 bg-card hover:bg-secondary hover:border-primary/50"
+                >
+                    <Users className="h-4 w-4" />
+                    <span>User Management</span>
+                </Button>
+            )}
+        </div>
+    );
+};
+
 const ProfileDropdown = () => {
     const navigate = useNavigate();
     const {mutate: logout, isPending} = useLogout();
@@ -71,7 +101,10 @@ const ProfileDropdown = () => {
 
     return (
         <DropdownMenu>
-            <DropdownMenuTrigger className="rounded-full cursor-pointer">
+            <DropdownMenuTrigger
+                className="rounded-full cursor-pointer"
+                aria-label="Open profile menu"
+            >
                 <div className="flex items-center justify-center h-8 w-8 rounded-full bg-secondary text-card-foreground select-none">
                     <span className="text-xs font-medium">{initials}</span>
                 </div>
@@ -101,16 +134,6 @@ const ProfileDropdown = () => {
                 <DropdownMenuItem className="hover:bg-secondary">
                     <ThemeToggle />
                 </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                {user?.isAdmin && (
-                    <DropdownMenuItem
-                        onClick={() => navigate({to: "/user-management"})}
-                        className="flex gap-4 cursor-pointer hover:bg-secondary"
-                    >
-                        <UserIcon className="h-4 w-4" />
-                        <span>User Management</span>
-                    </DropdownMenuItem>
-                )}
                 <DropdownMenuItem
                     onClick={() => navigate({to: "/settings"})}
                     className="flex gap-4 cursor-pointer hover:bg-secondary"
