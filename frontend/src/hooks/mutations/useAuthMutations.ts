@@ -1,6 +1,5 @@
 import {useMutation} from "@tanstack/react-query";
 import {useNavigate} from "@tanstack/react-router";
-import {queryClient, queryKeys} from "@/lib/queryClient";
 import {toast} from "sonner";
 import {useServices} from "@/api/ServiceProvider";
 import type {LoginCredentials} from "@/api/services/auth.service";
@@ -8,6 +7,7 @@ import type {
     ChangePasswordRequest,
     ChangeUsernameRequest,
 } from "@/api/services/user.service";
+import {queryClient, queryKeys} from "@/lib/queryClient";
 
 export function useLogin() {
     const navigate = useNavigate();

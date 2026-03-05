@@ -1,14 +1,17 @@
+import {useRouteContext} from "@tanstack/react-router";
+import {AlertTriangle} from "lucide-react";
 import {useState} from "react";
 import {useForm} from "react-hook-form";
-import {Button} from "../ui/button";
+import {toast} from "sonner";
+import {ApiError} from "@/api/client";
+import {FileInputGroup} from "@/components/form/FileInputGroup";
+import {InputGroup} from "@/components/form/InputGroup";
+import {LoadingButton} from "@/components/ui/LoadingButton";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "../ui/card";
-import {AlertTriangle} from "lucide-react";
+    useDeleteProject,
+    useRenameProject,
+    useUploadSourceCode,
+} from "@/hooks/mutations/useProjectMutations";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -20,17 +23,14 @@ import {
     AlertDialogTitle,
     AlertDialogTrigger,
 } from "../ui/alert-dialog";
-import {toast} from "sonner";
-import {InputGroup} from "@/components/form/InputGroup";
-import {FileInputGroup} from "@/components/form/FileInputGroup";
-import {LoadingButton} from "@/components/ui/LoadingButton";
+import {Button} from "../ui/button";
 import {
-    useDeleteProject,
-    useRenameProject,
-    useUploadSourceCode,
-} from "@/hooks/mutations/useProjectMutations";
-import {useRouteContext} from "@tanstack/react-router";
-import {ApiError} from "@/api/client";
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "../ui/card";
 
 export function ProjectSettingsTab() {
     return (

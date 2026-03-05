@@ -2,6 +2,7 @@ import {CheckCircle2, Circle} from "lucide-react";
 import {useState} from "react";
 
 import type {MutantOverview} from "@/api/services/mutants.service";
+import {getStatusBadge} from "@/components/review/getStatusBadge";
 import {ScrollArea} from "@/components/ui/scroll-area";
 import {
     Select,
@@ -10,10 +11,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import {Card, CardContent, CardHeader, CardTitle} from "../ui/card";
-import {getStatusBadge} from "@/components/review/getStatusBadge";
-import {Button} from "../ui/button";
 import {useMutantStore} from "@/stores/mutantStore";
+import {Button} from "../ui/button";
+import {Card, CardContent, CardHeader, CardTitle} from "../ui/card";
 import {formatMutatorForLineBreaks} from "../utils/formatMutator";
 
 type FilterModes =

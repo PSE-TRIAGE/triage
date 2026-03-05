@@ -1,6 +1,6 @@
 import {useState} from "react";
 import {toast} from "sonner";
-
+import type {AdminUser} from "@/api/services/admin-users.service";
 import {
     AlertDialog,
     AlertDialogAction,
@@ -11,7 +11,6 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import type {AdminUser} from "@/api/services/admin-users.service";
 import {
     useAdminDeleteUser,
     useAdminDisableUser,

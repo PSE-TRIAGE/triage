@@ -1,33 +1,33 @@
-import {AuthServiceImpl, type AuthService} from "../api/services/auth.service";
 import {
-    ProjectsServiceImpl,
-    type ProjectsService,
-} from "../api/services/projects.service";
-import {UserServiceImpl, type UserService} from "../api/services/user.service";
-import {
-    AdminUsersServiceImpl,
-    type AdminUsersService,
-} from "../api/services/admin-users.service";
-import {
-    AdminFormFieldServiceImpl,
     type AdminFormFieldService,
+    AdminFormFieldServiceImpl,
 } from "../api/services/admin-formfield.service";
 import {
-    ExportServiceImpl,
+    type AdminUsersService,
+    AdminUsersServiceImpl,
+} from "../api/services/admin-users.service";
+import {
+    type AlgorithmsService,
+    AlgorithmsServiceImpl,
+} from "../api/services/algorithms.service";
+import {type AuthService, AuthServiceImpl} from "../api/services/auth.service";
+import {
     type ExportService,
+    ExportServiceImpl,
 } from "../api/services/export.service";
 import {
-    AlgorithmsServiceImpl,
-    type AlgorithmsService,
-} from "../api/services/algorithms.service";
-import {
-    MutantsServiceImpl,
     type MutantsService,
+    MutantsServiceImpl,
 } from "../api/services/mutants.service";
 import {
-    RatingsServiceImpl,
+    type ProjectsService,
+    ProjectsServiceImpl,
+} from "../api/services/projects.service";
+import {
     type RatingsService,
+    RatingsServiceImpl,
 } from "../api/services/ratings.service";
+import {type UserService, UserServiceImpl} from "../api/services/user.service";
 
 export interface Services {
     authService: AuthService;

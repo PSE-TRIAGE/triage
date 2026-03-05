@@ -1,7 +1,7 @@
 import z from "zod";
 import {apiClient} from "../client";
 import {API_ENDPOINTS} from "../endpoints";
-import {UserSchema, type User} from "./auth.service";
+import {type User, UserSchema} from "./auth.service";
 
 export type ChangeUsernameRequest = {
     new_username: string;

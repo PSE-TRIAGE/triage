@@ -1,7 +1,10 @@
-import {useState} from "react";
 import {useRouteContext} from "@tanstack/react-router";
+import {useState} from "react";
 import {toast} from "sonner";
-
+import {ApiError} from "@/api/client";
+import type {AlgorithmInfo} from "@/api/services/algorithms.service";
+import {useApplyAlgorithm} from "@/hooks/mutations/useApplyAlgorithm";
+import {useAlgorithms} from "@/hooks/queries/useAlgorithms";
 import {
     Card,
     CardContent,
@@ -10,10 +13,6 @@ import {
     CardTitle,
 } from "../ui/card";
 import {LoadingButton} from "../ui/LoadingButton";
-import {ApiError} from "@/api/client";
-import type {AlgorithmInfo} from "@/api/services/algorithms.service";
-import {useApplyAlgorithm} from "@/hooks/mutations/useApplyAlgorithm";
-import {useAlgorithms} from "@/hooks/queries/useAlgorithms";
 
 export function AlgorithmSettingsTab() {
     const {project} = useRouteContext({

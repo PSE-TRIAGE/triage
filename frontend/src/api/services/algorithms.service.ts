@@ -20,7 +20,9 @@ const ApplyAlgorithmResponseSchema = z.object({
 });
 
 export type AlgorithmInfo = z.infer<typeof AlgorithmInfoSchema>;
-export type ApplyAlgorithmResponse = z.infer<typeof ApplyAlgorithmResponseSchema>;
+export type ApplyAlgorithmResponse = z.infer<
+    typeof ApplyAlgorithmResponseSchema
+>;
 
 export interface AlgorithmsService {
     listAlgorithms(): Promise<AlgorithmInfo[]>;

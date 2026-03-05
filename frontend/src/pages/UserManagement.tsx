@@ -1,35 +1,30 @@
+import {Separator} from "@radix-ui/react-dropdown-menu";
+import {useMutation} from "@tanstack/react-query";
 import {
-    Users,
-    Search,
-    UserPlus,
-    Shield,
-    MoreVertical,
     FileCode,
     Loader2,
+    MoreVertical,
     Pencil,
-    Trash2,
     RotateCcw,
+    Search,
+    Shield,
+    Trash2,
+    UserPlus,
+    Users,
 } from "lucide-react";
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import {useMemo, useState} from "react";
+import {toast} from "sonner";
+import {useServices} from "@/api/ServiceProvider";
+import type {AdminUser, UserProject} from "@/api/services/admin-users.service";
 import {Badge} from "@/components/ui/badge";
-import {ScrollArea} from "@/components/ui/scroll-area";
+import {Button} from "@/components/ui/button";
+import {
+    Card,
+    CardContent,
+    CardDescription,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
 import {
     Dialog,
     DialogClose,
@@ -40,29 +35,34 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import {
-    Card,
-    CardContent,
-    CardDescription,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
-import {Separator} from "@radix-ui/react-dropdown-menu";
-import {useMemo, useState} from "react";
-import {CreateUserModal} from "@/components/users/CreateUserModel";
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {Input} from "@/components/ui/input";
+import {ScrollArea} from "@/components/ui/scroll-area";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
 import {ChangeAdminStatus} from "@/components/users/ChangeAdminStatus";
+import {CreateUserModal} from "@/components/users/CreateUserModel";
 import {DeleteUser} from "@/components/users/DeleteUser";
 import {ReactivateUser} from "@/components/users/ReactivateUser";
 import {
-    useAdminUsers,
     useAdminProjects,
     useAdminUserProjects,
+    useAdminUsers,
 } from "@/hooks/queries/useAdminQueries";
 import {useMe} from "@/hooks/queries/useUserQueries";
-import type {AdminUser, UserProject} from "@/api/services/admin-users.service";
-import {useMutation} from "@tanstack/react-query";
-import {useServices} from "@/api/ServiceProvider";
 import {queryClient, queryKeys} from "@/lib/queryClient";
-import {toast} from "sonner";
 
 export function UserManagement() {
     const [searchQuery, setSearchQuery] = useState("");

@@ -1,7 +1,7 @@
-import type {MutantOverview} from "@/api/services/mutants.service";
+import {Separator} from "@radix-ui/react-dropdown-menu";
 import {AlertTriangle, CheckCircle, Clock} from "lucide-react";
 import {useMemo} from "react";
-
+import type {MutantOverview} from "@/api/services/mutants.service";
 import {
     Card,
     CardContent,
@@ -9,11 +9,10 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
-import {Separator} from "@radix-ui/react-dropdown-menu";
-import {useMutantStore} from "@/stores/mutantStore";
-import {getStatusBadge} from "./getStatusBadge";
-import {formatMutatorForLineBreaks} from "../utils/formatMutator";
 import {useMutantDetails} from "@/hooks/queries/useMutantQueries";
+import {useMutantStore} from "@/stores/mutantStore";
+import {formatMutatorForLineBreaks} from "../utils/formatMutator";
+import {getStatusBadge} from "./getStatusBadge";
 import {SourceCodeViewer} from "./SourceCodeViewer";
 
 export function DetailPanel() {
@@ -215,7 +214,8 @@ function MutationInfoCard({
                 <div>
                     <dt className="text-muted-foreground mb-1">Description</dt>
                     <dd className="text-card-foreground bg-secondary px-3 py-2 rounded break-words">
-                        {description.charAt(0).toUpperCase() + description.slice(1)}
+                        {description.charAt(0).toUpperCase() +
+                            description.slice(1)}
                     </dd>
                 </div>
             )}

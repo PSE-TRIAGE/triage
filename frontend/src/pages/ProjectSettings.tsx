@@ -1,20 +1,20 @@
-import {useState} from "react";
-import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
-import {FormBuilderTab} from "@/components/projectSettings/FormBuilderTab";
-import {AlgorithmSettingsTab} from "@/components/projectSettings/AlgorithmSettingsTab";
-import {ExportDataTab} from "@/components/projectSettings/ExportDataTab";
-import {ProjectSettingsTab} from "@/components/projectSettings/ProjectSettingsTab";
-import {ProjectMembersTab} from "@/components/projectSettings/ProjectMembersTab";
+import {useNavigate} from "@tanstack/react-router";
 import {
     ArrowLeft,
-    Sliders,
     FileDown,
     LayoutList,
     Settings,
+    Sliders,
     Users,
 } from "lucide-react";
+import {useState} from "react";
+import {AlgorithmSettingsTab} from "@/components/projectSettings/AlgorithmSettingsTab";
+import {ExportDataTab} from "@/components/projectSettings/ExportDataTab";
+import {FormBuilderTab} from "@/components/projectSettings/FormBuilderTab";
+import {ProjectMembersTab} from "@/components/projectSettings/ProjectMembersTab";
+import {ProjectSettingsTab} from "@/components/projectSettings/ProjectSettingsTab";
 import {Button} from "@/components/ui/button";
-import {useNavigate} from "@tanstack/react-router";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "@/components/ui/tabs";
 
 const getTabItems = () => [
     {

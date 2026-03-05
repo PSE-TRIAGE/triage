@@ -1,6 +1,6 @@
 import {useQuery} from "@tanstack/react-query";
-import {queryKeys} from "@/lib/queryClient";
 import {useServices} from "@/api/ServiceProvider";
+import {queryKeys} from "@/lib/queryClient";
 
 export function useProjects() {
     const {projectsService} = useServices();

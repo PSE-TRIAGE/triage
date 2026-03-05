@@ -1,7 +1,6 @@
 import {useMutation} from "@tanstack/react-query";
 import {useNavigate} from "@tanstack/react-router";
 import {toast} from "sonner";
-import {queryClient, queryKeys} from "@/lib/queryClient";
 import {useServices} from "@/api/ServiceProvider";
 import type {
     AdminProject,
@@ -9,6 +8,7 @@ import type {
     Project,
     ProjectUser,
 } from "@/api/services/projects.service";
+import {queryClient, queryKeys} from "@/lib/queryClient";
 import {useMutantStore} from "@/stores/mutantStore";
 
 export function useCreateProject() {

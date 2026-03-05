@@ -1,8 +1,9 @@
+import {useRouteContext} from "@tanstack/react-router";
+import {Loader2, Search, UserMinus, UserPlus, Users} from "lucide-react";
 import {useMemo, useState} from "react";
-import {Users, Search, UserPlus, UserMinus, Loader2} from "lucide-react";
-import {Button} from "@/components/ui/button";
-import {Input} from "@/components/ui/input";
+import type {ProjectUser} from "@/api/services/projects.service";
 import {Badge} from "@/components/ui/badge";
+import {Button} from "@/components/ui/button";
 import {
     Card,
     CardContent,
@@ -10,6 +11,7 @@ import {
     CardHeader,
     CardTitle,
 } from "@/components/ui/card";
+import {Input} from "@/components/ui/input";
 import {
     Table,
     TableBody,
@@ -18,15 +20,13 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import {useAdminUsers} from "@/hooks/queries/useAdminQueries";
-import {useProjectUsers} from "@/hooks/queries/useProjectQueries";
 import {
     useAddProjectUser,
     useRemoveProjectUser,
 } from "@/hooks/mutations/useProjectMutations";
+import {useAdminUsers} from "@/hooks/queries/useAdminQueries";
+import {useProjectUsers} from "@/hooks/queries/useProjectQueries";
 import {useMe} from "@/hooks/queries/useUserQueries";
-import type {ProjectUser} from "@/api/services/projects.service";
-import {useRouteContext} from "@tanstack/react-router";
 
 export function ProjectMembersTab() {
     const [searchQuery, setSearchQuery] = useState("");

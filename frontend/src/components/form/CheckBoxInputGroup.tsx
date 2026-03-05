@@ -1,6 +1,6 @@
+import {CheckIcon} from "lucide-react";
 import {forwardRef} from "react";
 import {Label} from "@/components/ui/label";
-import {CheckIcon} from "lucide-react";
 
 export interface CheckboxGroupProps
     extends React.InputHTMLAttributes<HTMLInputElement> {
