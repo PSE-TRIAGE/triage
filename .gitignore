@@ -14,6 +14,12 @@ count.txt
 .wrangler
 routeTree.gen.ts
 
+# Playwright
+frontend/playwright/.cache
+frontend/playwright-report/
+frontend/coverage/
+frontend/test-results/
+
 # Backend
 venv
 __pycache__
