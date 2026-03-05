@@ -21,6 +21,7 @@ export function useCreateProject() {
 
         onSuccess: () => {
             queryClient.invalidateQueries({queryKey: queryKeys.projects.all});
+            queryClient.invalidateQueries({queryKey: queryKeys.admin.projects});
             queryClient.invalidateQueries({queryKey: ["mutants", "source"]});
 
             clearMutantStore.setProjectId(null);
