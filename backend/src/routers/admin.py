@@ -197,7 +197,8 @@ async def create_project(
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
-        raise HTTPException(status_code=500, detail="Server error during parsing")
+        print(f"XML parsing error: {e}")
+        raise HTTPException(status_code=400, detail=f"Failed to parse XML: {e}")
 
     try:
         project_id = await project_service.create(project_name, parsed_data)
