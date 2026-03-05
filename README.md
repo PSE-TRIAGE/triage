@@ -56,7 +56,9 @@ These instructions will get a copy of the project up and running on your local m
     API_BASE_URL=/api
     ```
 
-3.  **Configure HTTPS (Optional):**  
+3.  **Configure Custom HTTPS Certificates (Optional):**  
+
+    HTTPS is enabled by default with self-signed certificates. To use custom certificates instead:
 
     Create a `certs/` folder in the project root. Place your certificate (`fullchain.pem`) and private key (`privkey.pem`) inside.
 
@@ -69,13 +71,12 @@ These instructions will get a copy of the project up and running on your local m
 4.  **Build and Run:**
     Use Docker Compose to build the images and start the services.
     ```bash
-    docker compose up -d
+    docker compose up -d --build
     ```
-    * Add the `--build` flag to ensure that the backend and frontend images are built from the local source files defined in `docker/`.*
 
 5.  **Access the Application:**
     Once the containers are running, access the web interface via your browser:
-    *   **URL:** `http://localhost` (or the port specified in `FRONTEND_PORT`).
+    *   **URL:** `http://localhost` (or the port specified in `HTTP_PORT`).
 
 ### 🔑 Default Login
 
