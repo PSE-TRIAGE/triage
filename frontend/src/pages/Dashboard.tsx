@@ -48,7 +48,9 @@ export function Dashboard() {
                 )}
 
                 {/* Empty State - No Projects */}
-                {filteredProjects.length === 0 && searchQuery.length === 0 && (
+                {!isLoading &&
+                    filteredProjects.length === 0 &&
+                    searchQuery.length === 0 && (
                     <div className="flex flex-col items-center justify-center gap-5 w-full mt-40">
                         <FolderOpen className="w-20 h-20 text-secondary-foreground mb-5" />
                         <div className="flex flex-col items-center justify-center gap-2">
@@ -64,7 +66,9 @@ export function Dashboard() {
                 )}
 
                 {/* Empty State - No Search results*/}
-                {filteredProjects.length === 0 && searchQuery.length > 0 && (
+                {!isLoading &&
+                    filteredProjects.length === 0 &&
+                    searchQuery.length > 0 && (
                     <div className="flex flex-col items-center justify-center gap-5 w-full mt-40">
                         <Search className="w-20 h-20 text-secondary-foreground" />
                         <p className="text-secondary-foreground text-center">

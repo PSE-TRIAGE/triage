@@ -1,190 +1,383 @@
-import {describe, expect, it, vi, beforeEach} from "vitest";
-import {renderHook, waitFor, act} from "@testing-library/react";
+import {act, renderHook, waitFor} from "@testing-library/react";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 import {createWrapper} from "@/test-utils";
+import {queryClient, queryKeys} from "@/lib/queryClient";
 import {
-	useCreateProject,
-	useDeleteProject,
-	useRenameProject,
-	useAddProjectUser,
-	useUploadSourceCode,
-	useRemoveProjectUser,
+    useAddProjectUser,
+    useCreateProject,
+    useDeleteProject,
+    useRemoveProjectUser,
+    useRenameProject,
+    useUploadSourceCode,
 } from "../useProjectMutations";
 
-vi.mock("@tanstack/react-router", () => ({
-	useNavigate: () => vi.fn(),
+const mocks = vi.hoisted(() => ({
+    navigate: vi.fn(),
+    toastSuccess: vi.fn(),
+    toastError: vi.fn(),
+    setProjectId: vi.fn(),
+    setMutants: vi.fn(),
+    setSelectedMutant: vi.fn(),
 }));
 
-describe("useCreateProject", () => {
-	it("calls projectsService.createProject", async () => {
-		const createProject = vi.fn().mockResolvedValue({id: 1});
-		const wrapper = createWrapper({projectsService: {createProject} as any});
+vi.mock("@tanstack/react-router", () => ({
+    useNavigate: () => mocks.navigate,
+}));
 
-		const {result} = renderHook(() => useCreateProject(), {wrapper});
+vi.mock("sonner", () => ({
+    toast: {
+        success: (...args: unknown[]) => mocks.toastSuccess(...args),
+        error: (...args: unknown[]) => mocks.toastError(...args),
+    },
+}));
 
-		await act(async () => {
-			result.current.mutate({name: "New Project"});
-		});
+vi.mock("@/stores/mutantStore", () => ({
+    useMutantStore: {
+        getState: () => ({
+            setProjectId: mocks.setProjectId,
+            setMutants: mocks.setMutants,
+            setSelectedMutant: mocks.setSelectedMutant,
+        }),
+    },
+}));
 
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(createProject).toHaveBeenCalledWith({name: "New Project"});
-	});
+function findSetQueryDataCall(
+    setQueryDataSpy: {mock: {calls: unknown[][]}},
+    queryKey: readonly unknown[],
+) {
+    return setQueryDataSpy.mock.calls.find(
+        ([key]) => JSON.stringify(key) === JSON.stringify(queryKey),
+    );
+}
 
-	it("handles error", async () => {
-		const createProject = vi.fn().mockRejectedValue(new Error("fail"));
-		const wrapper = createWrapper({projectsService: {createProject} as any});
+describe("useProjectMutations", () => {
+    beforeEach(() => {
+        vi.restoreAllMocks();
+        vi.clearAllMocks();
+        queryClient.clear();
+    });
 
-		const {result} = renderHook(() => useCreateProject(), {wrapper});
+    describe("useCreateProject", () => {
+        it("invalidates relevant project/mutant queries and clears mutant store", async () => {
+            const invalidateQueriesSpy = vi
+                .spyOn(queryClient, "invalidateQueries")
+                .mockResolvedValue(undefined);
+            const createProject = vi.fn().mockResolvedValue({id: 1});
+            const wrapper = createWrapper({projectsService: {createProject} as any});
+            const {result} = renderHook(() => useCreateProject(), {wrapper});
+            const file = new File(["xml"], "mutations.xml", {
+                type: "application/xml",
+            });
 
-		await act(async () => {
-			result.current.mutate({name: "New Project"});
-		});
+            await act(async () => {
+                result.current.mutate({projectName: "New Project", file});
+            });
 
-		await waitFor(() => expect(result.current.isError).toBe(true));
-	});
-});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            expect(createProject).toHaveBeenCalledWith({
+                projectName: "New Project",
+                file,
+            });
+            expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+                queryKey: queryKeys.projects.all,
+            });
+            expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+                queryKey: ["mutants", "source"],
+            });
+            expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+                queryKey: ["mutants"],
+            });
+            expect(mocks.setProjectId).toHaveBeenCalledWith(null);
+            expect(mocks.setMutants).toHaveBeenCalledWith([]);
+            expect(mocks.setSelectedMutant).toHaveBeenCalledWith(null);
+        });
 
-describe("useDeleteProject", () => {
-	it("calls projectsService.deleteProject", async () => {
-		const deleteProject = vi.fn().mockResolvedValue(undefined);
-		const wrapper = createWrapper({projectsService: {deleteProject} as any});
+        it("surfaces creation error without clearing store", async () => {
+            const invalidateQueriesSpy = vi.spyOn(queryClient, "invalidateQueries");
+            const createProject = vi.fn().mockRejectedValue(new Error("fail"));
+            const wrapper = createWrapper({projectsService: {createProject} as any});
+            const {result} = renderHook(() => useCreateProject(), {wrapper});
+            const file = new File(["xml"], "mutations.xml", {
+                type: "application/xml",
+            });
 
-		const {result} = renderHook(() => useDeleteProject(), {wrapper});
+            await act(async () => {
+                result.current.mutate({projectName: "New Project", file});
+            });
 
-		await act(async () => {
-			result.current.mutate(1);
-		});
+            await waitFor(() => expect(result.current.isError).toBe(true));
+            expect(invalidateQueriesSpy).not.toHaveBeenCalled();
+            expect(mocks.setProjectId).not.toHaveBeenCalled();
+            expect(mocks.setMutants).not.toHaveBeenCalled();
+            expect(mocks.setSelectedMutant).not.toHaveBeenCalled();
+        });
+    });
 
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(deleteProject).toHaveBeenCalledWith(1);
-	});
+    describe("useDeleteProject", () => {
+        it("updates cache, invalidates queries, resets store and navigates", async () => {
+            const setQueryDataSpy = vi.spyOn(queryClient, "setQueryData");
+            const invalidateQueriesSpy = vi
+                .spyOn(queryClient, "invalidateQueries")
+                .mockResolvedValue(undefined);
+            const deleteProject = vi.fn().mockResolvedValue(undefined);
+            const wrapper = createWrapper({projectsService: {deleteProject} as any});
+            const {result} = renderHook(() => useDeleteProject(), {wrapper});
 
-	it("handles error", async () => {
-		const deleteProject = vi.fn().mockRejectedValue(new Error("fail"));
-		const wrapper = createWrapper({projectsService: {deleteProject} as any});
+            await act(async () => {
+                result.current.mutate(1);
+            });
 
-		const {result} = renderHook(() => useDeleteProject(), {wrapper});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            expect(deleteProject).toHaveBeenCalledWith(1);
 
-		await act(async () => {
-			result.current.mutate(1);
-		});
+            const projectsCall = findSetQueryDataCall(
+                setQueryDataSpy,
+                queryKeys.projects.all,
+            );
+            expect(projectsCall).toBeDefined();
+            const projectsUpdater = projectsCall?.[1] as
+                | ((projects: Array<{id: number; name: string}>) => Array<{id: number; name: string}>)
+                | undefined;
+            expect(
+                projectsUpdater?.([
+                    {id: 1, name: "A"},
+                    {id: 2, name: "B"},
+                ]),
+            ).toEqual([{id: 2, name: "B"}]);
 
-		await waitFor(() => expect(result.current.isError).toBe(true));
-	});
-});
+            expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+                queryKey: queryKeys.projects.all,
+            });
+            expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+                queryKey: ["mutants"],
+            });
+            expect(mocks.setProjectId).toHaveBeenCalledWith(null);
+            expect(mocks.setMutants).toHaveBeenCalledWith([]);
+            expect(mocks.setSelectedMutant).toHaveBeenCalledWith(null);
+            expect(mocks.toastSuccess).toHaveBeenCalledWith(
+                "Project deleted successfully",
+            );
+            expect(mocks.navigate).toHaveBeenCalledWith({to: "/dashboard"});
+        });
 
-describe("useRenameProject", () => {
-	it("calls projectsService.renameProject", async () => {
-		const renameProject = vi.fn().mockResolvedValue({id: 1, name: "Renamed"});
-		const wrapper = createWrapper({projectsService: {renameProject} as any});
+        it("shows error toast when delete fails", async () => {
+            const setQueryDataSpy = vi.spyOn(queryClient, "setQueryData");
+            const invalidateQueriesSpy = vi.spyOn(queryClient, "invalidateQueries");
+            const deleteProject = vi.fn().mockRejectedValue(new Error("fail"));
+            const wrapper = createWrapper({projectsService: {deleteProject} as any});
+            const {result} = renderHook(() => useDeleteProject(), {wrapper});
 
-		const {result} = renderHook(() => useRenameProject(), {wrapper});
+            await act(async () => {
+                result.current.mutate(1);
+            });
 
-		await act(async () => {
-			result.current.mutate({projectId: 1, name: "Renamed"});
-		});
+            await waitFor(() => expect(result.current.isError).toBe(true));
+            expect(setQueryDataSpy).not.toHaveBeenCalled();
+            expect(invalidateQueriesSpy).not.toHaveBeenCalled();
+            expect(mocks.toastError).toHaveBeenCalledWith(
+                "Failed to delete project",
+            );
+            expect(mocks.navigate).not.toHaveBeenCalled();
+        });
+    });
 
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(renameProject).toHaveBeenCalledWith(1, {name: "Renamed"});
-	});
+    describe("useRenameProject", () => {
+        it("updates project names across project/admin/detail caches", async () => {
+            const setQueryDataSpy = vi.spyOn(queryClient, "setQueryData");
+            const renameProject = vi
+                .fn()
+                .mockResolvedValue({id: 1, name: "Renamed"});
+            const wrapper = createWrapper({projectsService: {renameProject} as any});
+            const {result} = renderHook(() => useRenameProject(), {wrapper});
 
-	it("handles error", async () => {
-		const renameProject = vi.fn().mockRejectedValue(new Error("fail"));
-		const wrapper = createWrapper({projectsService: {renameProject} as any});
+            await act(async () => {
+                result.current.mutate({projectId: 1, name: "Renamed"});
+            });
 
-		const {result} = renderHook(() => useRenameProject(), {wrapper});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            expect(renameProject).toHaveBeenCalledWith(1, {name: "Renamed"});
 
-		await act(async () => {
-			result.current.mutate({projectId: 1, name: "Renamed"});
-		});
+            const projectsCall = findSetQueryDataCall(
+                setQueryDataSpy,
+                queryKeys.projects.all,
+            );
+            expect(projectsCall).toBeDefined();
+            const projectsUpdater = projectsCall?.[1] as
+                | ((projects: Array<{id: number; name: string}>) => Array<{id: number; name: string}>)
+                | undefined;
+            expect(
+                projectsUpdater?.([
+                    {id: 1, name: "Old"},
+                    {id: 2, name: "Keep"},
+                ]),
+            ).toEqual([
+                {id: 1, name: "Renamed"},
+                {id: 2, name: "Keep"},
+            ]);
 
-		await waitFor(() => expect(result.current.isError).toBe(true));
-	});
-});
+            const adminProjectsCall = findSetQueryDataCall(
+                setQueryDataSpy,
+                queryKeys.admin.projects,
+            );
+            expect(adminProjectsCall).toBeDefined();
 
-describe("useAddProjectUser", () => {
-	it("calls projectsService.addUserToProject", async () => {
-		const addUserToProject = vi.fn().mockResolvedValue(undefined);
-		const wrapper = createWrapper({projectsService: {addUserToProject} as any});
+            const detailCall = findSetQueryDataCall(setQueryDataSpy, [
+                queryKeys.projects,
+                "1",
+            ]);
+            expect(detailCall).toBeDefined();
+        });
 
-		const {result} = renderHook(() => useAddProjectUser(1), {wrapper});
+        it("does not patch cache when rename fails", async () => {
+            const setQueryDataSpy = vi.spyOn(queryClient, "setQueryData");
+            const renameProject = vi.fn().mockRejectedValue(new Error("fail"));
+            const wrapper = createWrapper({projectsService: {renameProject} as any});
+            const {result} = renderHook(() => useRenameProject(), {wrapper});
 
-		await act(async () => {
-			result.current.mutate(2);
-		});
+            await act(async () => {
+                result.current.mutate({projectId: 1, name: "Renamed"});
+            });
 
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(addUserToProject).toHaveBeenCalledWith(1, 2);
-	});
+            await waitFor(() => expect(result.current.isError).toBe(true));
+            expect(setQueryDataSpy).not.toHaveBeenCalled();
+        });
+    });
 
-	it("handles error", async () => {
-		const addUserToProject = vi.fn().mockRejectedValue(new Error("fail"));
-		const wrapper = createWrapper({projectsService: {addUserToProject} as any});
+    describe("useAddProjectUser", () => {
+        it("adds selected admin user from cache to project users and invalidates", async () => {
+            queryClient.setQueryData(queryKeys.admin.users, [
+                {id: 2, username: "john", isAdmin: false, isActive: true},
+            ]);
+            const setQueryDataSpy = vi.spyOn(queryClient, "setQueryData");
+            const invalidateQueriesSpy = vi
+                .spyOn(queryClient, "invalidateQueries")
+                .mockResolvedValue(undefined);
+            const addUserToProject = vi.fn().mockResolvedValue(undefined);
+            const wrapper = createWrapper({
+                projectsService: {addUserToProject} as any,
+            });
+            const {result} = renderHook(() => useAddProjectUser(1), {wrapper});
 
-		const {result} = renderHook(() => useAddProjectUser(1), {wrapper});
+            await act(async () => {
+                result.current.mutate(2);
+            });
 
-		await act(async () => {
-			result.current.mutate(2);
-		});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            expect(addUserToProject).toHaveBeenCalledWith(1, 2);
 
-		await waitFor(() => expect(result.current.isError).toBe(true));
-	});
-});
+            const usersCall = findSetQueryDataCall(
+                setQueryDataSpy,
+                queryKeys.projects.users(1),
+            );
+            expect(usersCall).toBeDefined();
+            const usersUpdater = usersCall?.[1] as
+                | ((users: Array<{id: number; username: string}>) => Array<{id: number; username: string}>)
+                | undefined;
+            expect(usersUpdater?.([])).toEqual([
+                {id: 2, username: "john", isAdmin: false, isActive: true},
+            ]);
 
-describe("useUploadSourceCode", () => {
-	it("calls projectsService.uploadSourceCode", async () => {
-		const uploadSourceCode = vi.fn().mockResolvedValue(undefined);
-		const wrapper = createWrapper({projectsService: {uploadSourceCode} as any});
+            expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+                queryKey: queryKeys.projects.users(1),
+            });
+            expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+                queryKey: queryKeys.admin.userProjects(2),
+            });
+        });
 
-		const {result} = renderHook(() => useUploadSourceCode(), {wrapper});
-		const file = new File(["content"], "test.zip");
+        it("does not duplicate user when already assigned", async () => {
+            queryClient.setQueryData(queryKeys.admin.users, [
+                {id: 2, username: "john", isAdmin: false, isActive: true},
+            ]);
+            const setQueryDataSpy = vi.spyOn(queryClient, "setQueryData");
+            const addUserToProject = vi.fn().mockResolvedValue(undefined);
+            const wrapper = createWrapper({
+                projectsService: {addUserToProject} as any,
+            });
+            const {result} = renderHook(() => useAddProjectUser(1), {wrapper});
 
-		await act(async () => {
-			result.current.mutate({projectId: 1, file});
-		});
+            await act(async () => {
+                result.current.mutate(2);
+            });
 
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(uploadSourceCode).toHaveBeenCalledWith(1, file);
-	});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            const usersCall = findSetQueryDataCall(
+                setQueryDataSpy,
+                queryKeys.projects.users(1),
+            );
+            const usersUpdater = usersCall?.[1] as
+                | ((users: Array<{id: number; username: string}>) => Array<{id: number; username: string}>)
+                | undefined;
+            expect(usersUpdater?.([{id: 2, username: "john"}])).toEqual([
+                {id: 2, username: "john"},
+            ]);
+        });
+    });
 
-	it("handles error", async () => {
-		const uploadSourceCode = vi.fn().mockRejectedValue(new Error("fail"));
-		const wrapper = createWrapper({projectsService: {uploadSourceCode} as any});
+    describe("useUploadSourceCode", () => {
+        it("uploads source and invalidates mutant source query", async () => {
+            const invalidateQueriesSpy = vi
+                .spyOn(queryClient, "invalidateQueries")
+                .mockResolvedValue(undefined);
+            const uploadSourceCode = vi.fn().mockResolvedValue(undefined);
+            const wrapper = createWrapper({
+                projectsService: {uploadSourceCode} as any,
+            });
+            const {result} = renderHook(() => useUploadSourceCode(), {wrapper});
+            const file = new File(["content"], "source.zip");
 
-		const {result} = renderHook(() => useUploadSourceCode(), {wrapper});
+            await act(async () => {
+                result.current.mutate({projectId: 1, file});
+            });
 
-		await act(async () => {
-			result.current.mutate({projectId: 1, file: new File([""], "test.zip")});
-		});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            expect(uploadSourceCode).toHaveBeenCalledWith(1, file);
+            expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+                queryKey: ["mutants", "source"],
+            });
+        });
+    });
 
-		await waitFor(() => expect(result.current.isError).toBe(true));
-	});
-});
+    describe("useRemoveProjectUser", () => {
+        it("removes user from project cache and invalidates related queries", async () => {
+            const setQueryDataSpy = vi.spyOn(queryClient, "setQueryData");
+            const invalidateQueriesSpy = vi
+                .spyOn(queryClient, "invalidateQueries")
+                .mockResolvedValue(undefined);
+            const removeUserFromProject = vi.fn().mockResolvedValue(undefined);
+            const wrapper = createWrapper({
+                projectsService: {removeUserFromProject} as any,
+            });
+            const {result} = renderHook(() => useRemoveProjectUser(1), {wrapper});
 
-describe("useRemoveProjectUser", () => {
-	it("calls projectsService.removeUserFromProject", async () => {
-		const removeUserFromProject = vi.fn().mockResolvedValue(undefined);
-		const wrapper = createWrapper({projectsService: {removeUserFromProject} as any});
+            await act(async () => {
+                result.current.mutate(2);
+            });
 
-		const {result} = renderHook(() => useRemoveProjectUser(1), {wrapper});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            expect(removeUserFromProject).toHaveBeenCalledWith(1, 2);
 
-		await act(async () => {
-			result.current.mutate(2);
-		});
+            const usersCall = findSetQueryDataCall(
+                setQueryDataSpy,
+                queryKeys.projects.users(1),
+            );
+            expect(usersCall).toBeDefined();
+            const usersUpdater = usersCall?.[1] as
+                | ((users: Array<{id: number; username: string}>) => Array<{id: number; username: string}>)
+                | undefined;
+            expect(
+                usersUpdater?.([
+                    {id: 2, username: "john"},
+                    {id: 3, username: "jane"},
+                ]),
+            ).toEqual([{id: 3, username: "jane"}]);
 
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(removeUserFromProject).toHaveBeenCalledWith(1, 2);
-	});
-
-	it("handles error", async () => {
-		const removeUserFromProject = vi.fn().mockRejectedValue(new Error("fail"));
-		const wrapper = createWrapper({projectsService: {removeUserFromProject} as any});
-
-		const {result} = renderHook(() => useRemoveProjectUser(1), {wrapper});
-
-		await act(async () => {
-			result.current.mutate(2);
-		});
-
-		await waitFor(() => expect(result.current.isError).toBe(true));
-	});
+            expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+                queryKey: queryKeys.projects.users(1),
+            });
+            expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+                queryKey: queryKeys.admin.userProjects(2),
+            });
+        });
+    });
 });

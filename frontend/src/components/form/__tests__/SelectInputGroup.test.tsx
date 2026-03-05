@@ -33,12 +33,16 @@ describe("SelectInputGroup", () => {
     });
 
     it("does not render error when not provided", () => {
-        render(<SelectInputGroup label="Select" onValueChange={vi.fn()} />);
-        expect(screen.queryByText(/required/)).not.toBeInTheDocument();
+        const {container} = render(
+            <SelectInputGroup label="Select" onValueChange={vi.fn()} />,
+        );
+        expect(
+            container.querySelector("span.text-destructive.font-medium"),
+        ).toBeNull();
     });
 
     it("renders with the select trigger", () => {
         render(<SelectInputGroup label="Select" onValueChange={vi.fn()} />);
-        expect(screen.getByLabelText("Select")).toBeInTheDocument();
+        expect(screen.getByRole("combobox", {name: "Select"})).toBeInTheDocument();
     });
 });

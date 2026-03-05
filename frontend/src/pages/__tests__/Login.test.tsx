@@ -1,5 +1,5 @@
-import {describe, expect, it, vi} from "vitest";
-import {screen} from "@testing-library/react";
+import {beforeEach, describe, expect, it, vi} from "vitest";
+import {act, fireEvent, screen, waitFor} from "@testing-library/react";
 import {Login} from "../Login";
 import {renderWithProviders} from "@/test-utils";
 import {ApiError} from "@/api/client";
@@ -14,69 +14,100 @@ vi.mock("@/hooks/mutations/useAuthMutations", () => ({
 }));
 
 describe("Login", () => {
+	const mockMutate = vi.fn();
+
 	beforeEach(() => {
-		mockUseLogin.mockReturnValue({mutate: vi.fn(), isPending: false, isError: false, error: null});
+		mockMutate.mockReset();
+		mockUseLogin.mockReset();
+		mockUseLogin.mockReturnValue({
+			mutate: mockMutate,
+			isPending: false,
+			isError: false,
+			error: null,
+		});
 	});
 
-	it("renders welcome text", () => {
-		renderWithProviders(<Login />);
-		expect(screen.getByText(/Welcome to Triage/)).toBeInTheDocument();
-	});
-
-	it("renders login heading", () => {
-		renderWithProviders(<Login />);
-		expect(screen.getByText(/Login to your/)).toBeInTheDocument();
-	});
-
-	it("renders username input", () => {
+	it("renders the login form", () => {
 		renderWithProviders(<Login />);
 		expect(screen.getByPlaceholderText("e.g. I ❤ Informatik")).toBeInTheDocument();
-	});
-
-	it("renders password input", () => {
-		renderWithProviders(<Login />);
 		expect(screen.getByPlaceholderText("e.g. BadPassword123")).toBeInTheDocument();
+		expect(screen.getByRole("button", {name: "Login"})).toBeInTheDocument();
 	});
 
-	it("renders login button", () => {
+	it("shows required validation errors when submitting empty credentials", async () => {
 		renderWithProviders(<Login />);
-		expect(screen.getByText("Login")).toBeInTheDocument();
+		fireEvent.click(screen.getByRole("button", {name: "Login"}));
+
+		expect(await screen.findByText("please enter a valid username")).toBeInTheDocument();
+		expect(screen.getByText("please enter a valid password")).toBeInTheDocument();
 	});
 
-	it("renders KIT footer text", () => {
+	it("submits entered credentials via login mutation", async () => {
 		renderWithProviders(<Login />);
-		expect(screen.getByText(/Praxis der Softwareentwicklungs/)).toBeInTheDocument();
-	});
-
-	it("shows 401 error message", () => {
-		const err = new ApiError(401, "Unauthorized");
-		mockUseLogin.mockReturnValue({
-			mutate: vi.fn(), isPending: false, isError: true, error: err,
+		fireEvent.change(screen.getByPlaceholderText("e.g. I ❤ Informatik"), {
+			target: {value: "alice"},
 		});
-		renderWithProviders(<Login />);
-		expect(screen.getByText("Invalid username or password")).toBeInTheDocument();
-	});
-
-	it("shows 500 error message", () => {
-		const err = new ApiError(500, "Internal Server Error");
-		mockUseLogin.mockReturnValue({
-			mutate: vi.fn(), isPending: false, isError: true, error: err,
+		fireEvent.change(screen.getByPlaceholderText("e.g. BadPassword123"), {
+			target: {value: "sup3rsecret"},
 		});
-		renderWithProviders(<Login />);
-		expect(screen.getByText("Server error, please try again later")).toBeInTheDocument();
-	});
 
-	it("shows generic error message for non-ApiError", () => {
-		mockUseLogin.mockReturnValue({
-			mutate: vi.fn(), isPending: false, isError: true,
-			error: new Error("network error"),
+		fireEvent.click(screen.getByRole("button", {name: "Login"}));
+
+		await waitFor(() => {
+			expect(mockMutate).toHaveBeenCalledTimes(1);
 		});
-		renderWithProviders(<Login />);
-		expect(screen.getByText("Login failed. Please try again.")).toBeInTheDocument();
+		const [payload, options] = mockMutate.mock.calls[0];
+		expect(payload).toEqual({username: "alice", password: "sup3rsecret"});
+		expect(options).toEqual(expect.objectContaining({onError: expect.any(Function)}));
 	});
 
-	it("renders login image", () => {
+	it("clears only the password field when mutation onError callback runs", async () => {
 		renderWithProviders(<Login />);
-		expect(screen.getByAltText("Login Page")).toBeInTheDocument();
+		const usernameInput = screen.getByPlaceholderText("e.g. I ❤ Informatik") as HTMLInputElement;
+		const passwordInput = screen.getByPlaceholderText("e.g. BadPassword123") as HTMLInputElement;
+
+		fireEvent.change(usernameInput, {target: {value: "alice"}});
+		fireEvent.change(passwordInput, {target: {value: "bad-password"}});
+		fireEvent.click(screen.getByRole("button", {name: "Login"}));
+
+		await waitFor(() => {
+			expect(mockMutate).toHaveBeenCalledTimes(1);
+		});
+		const [, options] = mockMutate.mock.calls[0];
+		act(() => {
+			options.onError?.(new Error("Unauthorized"));
+		});
+
+		expect(usernameInput.value).toBe("alice");
+		expect(passwordInput.value).toBe("");
+	});
+
+	it("disables submit button and shows loading text while request is pending", () => {
+		mockUseLogin.mockReturnValue({
+			mutate: mockMutate,
+			isPending: true,
+			isError: false,
+			error: null,
+		});
+
+		renderWithProviders(<Login />);
+		const button = screen.getByRole("button", {name: "Loggin in.."});
+		expect(button).toBeDisabled();
+	});
+
+	it.each([
+		[new ApiError(401, "Unauthorized"), "Invalid username or password"],
+		[new ApiError(500, "Internal Server Error"), "Server error, please try again later"],
+		[new Error("network"), "Login failed. Please try again."],
+	])("shows correct error message for %p", (error, message) => {
+		mockUseLogin.mockReturnValue({
+			mutate: mockMutate,
+			isPending: false,
+			isError: true,
+			error,
+		});
+
+		renderWithProviders(<Login />);
+		expect(screen.getByText(message)).toBeInTheDocument();
 	});
 });

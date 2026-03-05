@@ -1,158 +1,237 @@
-import {describe, expect, it, vi, beforeEach} from "vitest";
-import {renderHook, waitFor, act} from "@testing-library/react";
+import {act, renderHook, waitFor} from "@testing-library/react";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 import {createWrapper} from "@/test-utils";
-import {useLogin, useLogout, useChangePassword, useChangeUsername, useDeactivateAccount} from "../useAuthMutations";
+import {queryClient, queryKeys} from "@/lib/queryClient";
+import {
+    useChangePassword,
+    useChangeUsername,
+    useDeactivateAccount,
+    useLogin,
+    useLogout,
+} from "../useAuthMutations";
 
-vi.mock("@tanstack/react-router", () => ({
-	useNavigate: () => vi.fn(),
+const mocks = vi.hoisted(() => ({
+    navigate: vi.fn(),
+    toastSuccess: vi.fn(),
+    toastError: vi.fn(),
 }));
 
-describe("useLogin", () => {
-	beforeEach(() => {
-		localStorage.setItem("auth_token", "test-token");
-	});
+vi.mock("@tanstack/react-router", () => ({
+    useNavigate: () => mocks.navigate,
+}));
 
-	it("calls authService.login on mutate", async () => {
-		const login = vi.fn().mockResolvedValue({token: "abc"});
-		const wrapper = createWrapper({authService: {login} as any});
+vi.mock("sonner", () => ({
+    toast: {
+        success: (...args: unknown[]) => mocks.toastSuccess(...args),
+        error: (...args: unknown[]) => mocks.toastError(...args),
+    },
+}));
 
-		const {result} = renderHook(() => useLogin(), {wrapper});
+describe("useAuthMutations", () => {
+    beforeEach(() => {
+        vi.restoreAllMocks();
+        vi.clearAllMocks();
+        queryClient.clear();
+        localStorage.clear();
+    });
 
-		await act(async () => {
-			result.current.mutate({username: "user", password: "pass"});
-		});
+    describe("useLogin", () => {
+        it("stores auth token and navigates to dashboard on success", async () => {
+            const login = vi.fn().mockResolvedValue({token: "abc"});
+            const wrapper = createWrapper({authService: {login} as any});
+            const {result} = renderHook(() => useLogin(), {wrapper});
 
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(login).toHaveBeenCalledWith({username: "user", password: "pass"});
-		expect(localStorage.getItem("auth_token")).toBe("abc");
-	});
+            await act(async () => {
+                result.current.mutate({username: "user", password: "pass"});
+            });
 
-	it("handles login error", async () => {
-		const login = vi.fn().mockRejectedValue(new Error("fail"));
-		const wrapper = createWrapper({authService: {login} as any});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            expect(login).toHaveBeenCalledWith({
+                username: "user",
+                password: "pass",
+            });
+            expect(localStorage.getItem("auth_token")).toBe("abc");
+            expect(mocks.navigate).toHaveBeenCalledWith({to: "/dashboard"});
+        });
 
-		const {result} = renderHook(() => useLogin(), {wrapper});
+        it("exposes mutation error and does not navigate", async () => {
+            const login = vi.fn().mockRejectedValue(new Error("fail"));
+            const wrapper = createWrapper({authService: {login} as any});
+            const {result} = renderHook(() => useLogin(), {wrapper});
 
-		await act(async () => {
-			result.current.mutate({username: "user", password: "pass"});
-		});
+            await act(async () => {
+                result.current.mutate({username: "user", password: "pass"});
+            });
 
-		await waitFor(() => expect(result.current.isError).toBe(true));
-	});
-});
+            await waitFor(() => expect(result.current.isError).toBe(true));
+            expect(mocks.navigate).not.toHaveBeenCalled();
+            expect(localStorage.getItem("auth_token")).toBeNull();
+        });
+    });
 
-describe("useLogout", () => {
-	it("calls authService.logout", async () => {
-		const logout = vi.fn().mockResolvedValue(undefined);
-		const wrapper = createWrapper({authService: {logout} as any});
+    describe("useLogout", () => {
+        it("clears token cache, resets query cache, and navigates to login", async () => {
+            localStorage.setItem("token", "legacy-token");
+            localStorage.setItem("auth_token", "auth-token");
 
-		const {result} = renderHook(() => useLogout(), {wrapper});
+            const clearSpy = vi.spyOn(queryClient, "clear");
+            const logout = vi.fn().mockResolvedValue(undefined);
+            const wrapper = createWrapper({authService: {logout} as any});
+            const {result} = renderHook(() => useLogout(), {wrapper});
 
-		await act(async () => {
-			result.current.mutate();
-		});
+            await act(async () => {
+                result.current.mutate();
+            });
 
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(logout).toHaveBeenCalled();
-	});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            expect(logout).toHaveBeenCalledTimes(1);
+            expect(localStorage.getItem("token")).toBeNull();
+            expect(localStorage.getItem("auth_token")).toBe("auth-token");
+            expect(clearSpy).toHaveBeenCalledTimes(1);
+            expect(mocks.navigate).toHaveBeenCalledWith({to: "/login"});
+            expect(mocks.toastSuccess).toHaveBeenCalledWith(
+                "Logged out successfully",
+            );
+        });
 
-	it("handles logout error", async () => {
-		const logout = vi.fn().mockRejectedValue(new Error("fail"));
-		const wrapper = createWrapper({authService: {logout} as any});
+        it("shows error toast when logout fails", async () => {
+            const clearSpy = vi.spyOn(queryClient, "clear");
+            const logout = vi.fn().mockRejectedValue(new Error("fail"));
+            const wrapper = createWrapper({authService: {logout} as any});
+            const {result} = renderHook(() => useLogout(), {wrapper});
 
-		const {result} = renderHook(() => useLogout(), {wrapper});
+            await act(async () => {
+                result.current.mutate();
+            });
 
-		await act(async () => {
-			result.current.mutate();
-		});
+            await waitFor(() => expect(result.current.isError).toBe(true));
+            expect(clearSpy).not.toHaveBeenCalled();
+            expect(mocks.navigate).not.toHaveBeenCalled();
+            expect(mocks.toastError).toHaveBeenCalledWith("Failed to logout");
+        });
+    });
 
-		await waitFor(() => expect(result.current.isError).toBe(true));
-	});
-});
+    describe("useChangePassword", () => {
+        it("calls userService.changePassword with request payload", async () => {
+            const changePassword = vi.fn().mockResolvedValue(undefined);
+            const wrapper = createWrapper({userService: {changePassword} as any});
+            const {result} = renderHook(() => useChangePassword(), {wrapper});
 
-describe("useChangePassword", () => {
-	it("calls userService.changePassword", async () => {
-		const changePassword = vi.fn().mockResolvedValue(undefined);
-		const wrapper = createWrapper({userService: {changePassword} as any});
+            await act(async () => {
+                result.current.mutate({
+                    old_password: "old",
+                    new_password: "new",
+                });
+            });
 
-		const {result} = renderHook(() => useChangePassword(), {wrapper});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            expect(changePassword).toHaveBeenCalledWith({
+                old_password: "old",
+                new_password: "new",
+            });
+        });
 
-		await act(async () => {
-			result.current.mutate({old_password: "old", new_password: "new"});
-		});
+        it("handles change password errors", async () => {
+            const changePassword = vi.fn().mockRejectedValue(new Error("fail"));
+            const wrapper = createWrapper({userService: {changePassword} as any});
+            const {result} = renderHook(() => useChangePassword(), {wrapper});
 
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(changePassword).toHaveBeenCalledWith({old_password: "old", new_password: "new"});
-	});
+            await act(async () => {
+                result.current.mutate({
+                    old_password: "old",
+                    new_password: "new",
+                });
+            });
 
-	it("handles error", async () => {
-		const changePassword = vi.fn().mockRejectedValue(new Error("fail"));
-		const wrapper = createWrapper({userService: {changePassword} as any});
+            await waitFor(() => expect(result.current.isError).toBe(true));
+        });
+    });
 
-		const {result} = renderHook(() => useChangePassword(), {wrapper});
+    describe("useChangeUsername", () => {
+        it("invalidates current user query after username change", async () => {
+            const invalidateQueriesSpy = vi
+                .spyOn(queryClient, "invalidateQueries")
+                .mockResolvedValue(undefined);
+            const changeUsername = vi.fn().mockResolvedValue(undefined);
+            const wrapper = createWrapper({userService: {changeUsername} as any});
+            const {result} = renderHook(() => useChangeUsername(), {wrapper});
 
-		await act(async () => {
-			result.current.mutate({old_password: "old", new_password: "new"});
-		});
+            await act(async () => {
+                result.current.mutate({new_username: "newuser"});
+            });
 
-		await waitFor(() => expect(result.current.isError).toBe(true));
-	});
-});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            expect(changeUsername).toHaveBeenCalledWith({new_username: "newuser"});
+            expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+                queryKey: queryKeys.auth.me,
+            });
+        });
 
-describe("useChangeUsername", () => {
-	it("calls userService.changeUsername", async () => {
-		const changeUsername = vi.fn().mockResolvedValue(undefined);
-		const wrapper = createWrapper({userService: {changeUsername} as any});
+        it("does not invalidate user query when request fails", async () => {
+            const invalidateQueriesSpy = vi.spyOn(
+                queryClient,
+                "invalidateQueries",
+            );
+            const changeUsername = vi.fn().mockRejectedValue(new Error("fail"));
+            const wrapper = createWrapper({userService: {changeUsername} as any});
+            const {result} = renderHook(() => useChangeUsername(), {wrapper});
 
-		const {result} = renderHook(() => useChangeUsername(), {wrapper});
+            await act(async () => {
+                result.current.mutate({new_username: "newuser"});
+            });
 
-		await act(async () => {
-			result.current.mutate({new_username: "newuser"});
-		});
+            await waitFor(() => expect(result.current.isError).toBe(true));
+            expect(invalidateQueriesSpy).not.toHaveBeenCalledWith({
+                queryKey: queryKeys.auth.me,
+            });
+        });
+    });
 
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(changeUsername).toHaveBeenCalledWith({new_username: "newuser"});
-	});
+    describe("useDeactivateAccount", () => {
+        it("clears token/cache, navigates home, and shows success toast", async () => {
+            localStorage.setItem("token", "legacy-token");
+            localStorage.setItem("auth_token", "auth-token");
 
-	it("handles error", async () => {
-		const changeUsername = vi.fn().mockRejectedValue(new Error("fail"));
-		const wrapper = createWrapper({userService: {changeUsername} as any});
+            const clearSpy = vi.spyOn(queryClient, "clear");
+            const deactivateAccount = vi.fn().mockResolvedValue(undefined);
+            const wrapper = createWrapper({
+                userService: {deactivateAccount} as any,
+            });
+            const {result} = renderHook(() => useDeactivateAccount(), {wrapper});
 
-		const {result} = renderHook(() => useChangeUsername(), {wrapper});
+            await act(async () => {
+                result.current.mutate();
+            });
 
-		await act(async () => {
-			result.current.mutate({new_username: "newuser"});
-		});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            expect(deactivateAccount).toHaveBeenCalledTimes(1);
+            expect(clearSpy).toHaveBeenCalledTimes(1);
+            expect(localStorage.getItem("token")).toBeNull();
+            expect(localStorage.getItem("auth_token")).toBe("auth-token");
+            expect(mocks.navigate).toHaveBeenCalledWith({to: "/"});
+            expect(mocks.toastSuccess).toHaveBeenCalledWith(
+                "Account deactivated successfully.",
+            );
+        });
 
-		await waitFor(() => expect(result.current.isError).toBe(true));
-	});
-});
+        it("shows error toast when account deactivation fails", async () => {
+            const clearSpy = vi.spyOn(queryClient, "clear");
+            const deactivateAccount = vi.fn().mockRejectedValue(new Error("fail"));
+            const wrapper = createWrapper({
+                userService: {deactivateAccount} as any,
+            });
+            const {result} = renderHook(() => useDeactivateAccount(), {wrapper});
 
-describe("useDeactivateAccount", () => {
-	it("calls userService.deactivateAccount", async () => {
-		const deactivateAccount = vi.fn().mockResolvedValue(undefined);
-		const wrapper = createWrapper({userService: {deactivateAccount} as any});
+            await act(async () => {
+                result.current.mutate();
+            });
 
-		const {result} = renderHook(() => useDeactivateAccount(), {wrapper});
-
-		await act(async () => {
-			result.current.mutate();
-		});
-
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(deactivateAccount).toHaveBeenCalled();
-	});
-
-	it("handles error", async () => {
-		const deactivateAccount = vi.fn().mockRejectedValue(new Error("fail"));
-		const wrapper = createWrapper({userService: {deactivateAccount} as any});
-
-		const {result} = renderHook(() => useDeactivateAccount(), {wrapper});
-
-		await act(async () => {
-			result.current.mutate();
-		});
-
-		await waitFor(() => expect(result.current.isError).toBe(true));
-	});
+            await waitFor(() => expect(result.current.isError).toBe(true));
+            expect(clearSpy).not.toHaveBeenCalled();
+            expect(mocks.navigate).not.toHaveBeenCalled();
+            expect(mocks.toastError).toHaveBeenCalledWith(
+                "Failed to deactivate account. Please try again.",
+            );
+        });
+    });
 });

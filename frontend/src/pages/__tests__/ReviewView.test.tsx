@@ -1,5 +1,5 @@
 import {describe, expect, it, vi, beforeEach} from "vitest";
-import {screen} from "@testing-library/react";
+import {fireEvent, screen, waitFor} from "@testing-library/react";
 import {renderWithProviders} from "@/test-utils";
 import {useMutantStore} from "@/stores/mutantStore";
 
@@ -31,49 +31,66 @@ vi.mock("@/components/review/ReviewFormPanel", () => ({
 	ReviewFormPanel: () => <div>ReviewFormPanel</div>,
 }));
 
+const mockNavigate = vi.fn();
 vi.mock("@tanstack/react-router", () => ({
-	useNavigate: () => vi.fn(),
+	useNavigate: () => mockNavigate,
 }));
 
 describe("ReviewView", () => {
 	beforeEach(() => {
+		mockNavigate.mockReset();
 		useMutantStore.setState({selectedMutant: null, mutants: [], projectId: undefined, isLoading: false});
 		mockUseProjectMutants.mockReturnValue({data: undefined, isLoading: false, error: null});
 		mockUseFormFields.mockReturnValue({data: [], isLoading: false});
 	});
 
-	it("shows empty state when no mutants exist", async () => {
+	async function renderReviewView() {
 		const {ReviewView} = await import("../ReviewView");
 		renderWithProviders(<ReviewView />);
-		expect(screen.getByText("No Mutant Selected")).toBeInTheDocument();
-	});
+	}
 
-	it("shows back button in empty state", async () => {
-		const {ReviewView} = await import("../ReviewView");
-		renderWithProviders(<ReviewView />);
-		expect(screen.getByText("Navigate Back")).toBeInTheDocument();
-	});
+	it("shows loading state when either mutants or form fields are loading", async () => {
+		mockUseProjectMutants.mockReturnValue({data: [], isLoading: false, error: null});
+		mockUseFormFields.mockReturnValue({data: [], isLoading: true});
+		await renderReviewView();
 
-	it("shows loading state", async () => {
-		mockUseProjectMutants.mockReturnValue({data: undefined, isLoading: true, error: null});
-		const {ReviewView} = await import("../ReviewView");
-		renderWithProviders(<ReviewView />);
 		expect(screen.getByText("Loading mutants...")).toBeInTheDocument();
 	});
 
-	it("shows error state", async () => {
+	it("shows error state when mutant query fails", async () => {
 		mockUseProjectMutants.mockReturnValue({data: undefined, isLoading: false, error: new Error("fail")});
-		const {ReviewView} = await import("../ReviewView");
-		renderWithProviders(<ReviewView />);
+		await renderReviewView();
+
 		expect(screen.getByText("Failed to load mutants")).toBeInTheDocument();
 	});
 
-	it("renders panels when mutant is selected", async () => {
+	it("shows empty state when no mutant is selected", async () => {
+		await renderReviewView();
+
+		expect(screen.getByText("No Mutant Selected")).toBeInTheDocument();
+		expect(screen.getByText("Navigate Back")).toBeInTheDocument();
+	});
+
+	it("navigates back when the empty-state action is clicked", async () => {
+		await renderReviewView();
+		fireEvent.click(screen.getByRole("button", {name: /Navigate Back/i}));
+
+		expect(mockNavigate).toHaveBeenCalledWith({to: "/"});
+	});
+
+	it("auto-selects the first fetched mutant and renders review panels", async () => {
 		const mockMutant = {id: 1, mutator: "Test", status: "SURVIVED", lineNumber: 1, rated: false, ranking: 1};
-		mockUseProjectMutants.mockReturnValue({data: [mockMutant], isLoading: false, error: null});
-		useMutantStore.setState({selectedMutant: mockMutant as any, mutants: [mockMutant as any]});
-		const {ReviewView} = await import("../ReviewView");
-		renderWithProviders(<ReviewView />);
+		mockUseProjectMutants.mockReturnValue({
+			data: [mockMutant],
+			isLoading: false,
+			error: null,
+		});
+
+		await renderReviewView();
+
+		await waitFor(() => {
+			expect(useMutantStore.getState().selectedMutant?.id).toBe(1);
+		});
 		expect(screen.getByText("MutationListPanel")).toBeInTheDocument();
 		expect(screen.getByText("DetailPanel")).toBeInTheDocument();
 		expect(screen.getByText("ReviewFormPanel")).toBeInTheDocument();

@@ -99,6 +99,7 @@ export function ReviewView() {
 
                 {/* Middle Panel - Detail */}
                 <ResizablePanel
+                    defaultSize={50}
                     minSize={1}
                     className="border-r-2 border-boder min-h-0 overflow-hidden"
                 >

@@ -1,125 +1,268 @@
-import {describe, expect, it, vi} from "vitest";
-import {renderHook, waitFor, act} from "@testing-library/react";
+import {act, renderHook, waitFor} from "@testing-library/react";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 import {createWrapper} from "@/test-utils";
+import {queryClient, queryKeys} from "@/lib/queryClient";
 import {
-	useCreateFormField,
-	useDeleteFormField,
-	useUpdateFormField,
-	useReorderFormFields,
+    useCreateFormField,
+    useDeleteFormField,
+    useReorderFormFields,
+    useUpdateFormField,
 } from "../useFormFieldMutations";
 
-describe("useCreateFormField", () => {
-	it("calls adminFormFieldService.createFormField", async () => {
-		const createFormField = vi.fn().mockResolvedValue({id: 1});
-		const wrapper = createWrapper({adminFormFieldService: {createFormField} as any});
+const mocks = vi.hoisted(() => ({
+    toastSuccess: vi.fn(),
+    toastError: vi.fn(),
+}));
 
-		const {result} = renderHook(() => useCreateFormField(1), {wrapper});
+vi.mock("sonner", () => ({
+    toast: {
+        success: (...args: unknown[]) => mocks.toastSuccess(...args),
+        error: (...args: unknown[]) => mocks.toastError(...args),
+    },
+}));
 
-		await act(async () => {
-			result.current.mutate({label: "Field", type: "text", order: 1});
-		});
+function findSetQueryDataCall(
+    setQueryDataSpy: {mock: {calls: unknown[][]}},
+    queryKey: readonly unknown[],
+) {
+    return setQueryDataSpy.mock.calls.find(
+        ([key]) => JSON.stringify(key) === JSON.stringify(queryKey),
+    );
+}
 
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(createFormField).toHaveBeenCalledWith(1, {label: "Field", type: "text", order: 1});
-	});
+describe("useFormFieldMutations", () => {
+    beforeEach(() => {
+        vi.restoreAllMocks();
+        vi.clearAllMocks();
+        queryClient.clear();
+    });
 
-	it("handles error", async () => {
-		const createFormField = vi.fn().mockRejectedValue(new Error("fail"));
-		const wrapper = createWrapper({adminFormFieldService: {createFormField} as any});
+    describe("useCreateFormField", () => {
+        it("creates form field, invalidates project fields, and shows success toast", async () => {
+            const invalidateQueriesSpy = vi
+                .spyOn(queryClient, "invalidateQueries")
+                .mockResolvedValue(undefined);
+            const createFormField = vi.fn().mockResolvedValue({id: 1});
+            const wrapper = createWrapper({
+                adminFormFieldService: {createFormField} as any,
+            });
+            const {result} = renderHook(() => useCreateFormField(1), {wrapper});
 
-		const {result} = renderHook(() => useCreateFormField(1), {wrapper});
+            await act(async () => {
+                result.current.mutate({
+                    label: "Field",
+                    type: "text",
+                    is_required: true,
+                });
+            });
 
-		await act(async () => {
-			result.current.mutate({label: "Field", type: "text", order: 1});
-		});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            expect(createFormField).toHaveBeenCalledWith(1, {
+                label: "Field",
+                type: "text",
+                is_required: true,
+            });
+            expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+                queryKey: queryKeys.formFields.byProject(1),
+            });
+            expect(mocks.toastSuccess).toHaveBeenCalledWith(
+                "Field created successfully",
+            );
+        });
 
-		await waitFor(() => expect(result.current.isError).toBe(true));
-	});
-});
+        it("shows error toast when create form field fails", async () => {
+            const createFormField = vi.fn().mockRejectedValue(new Error("fail"));
+            const wrapper = createWrapper({
+                adminFormFieldService: {createFormField} as any,
+            });
+            const {result} = renderHook(() => useCreateFormField(1), {wrapper});
 
-describe("useDeleteFormField", () => {
-	it("calls adminFormFieldService.deleteFormField", async () => {
-		const deleteFormField = vi.fn().mockResolvedValue(undefined);
-		const wrapper = createWrapper({adminFormFieldService: {deleteFormField} as any});
+            await act(async () => {
+                result.current.mutate({
+                    label: "Field",
+                    type: "text",
+                    is_required: true,
+                });
+            });
 
-		const {result} = renderHook(() => useDeleteFormField(1), {wrapper});
+            await waitFor(() => expect(result.current.isError).toBe(true));
+            expect(mocks.toastError).toHaveBeenCalledWith(
+                "Failed to create field, error occured",
+            );
+        });
+    });
 
-		await act(async () => {
-			result.current.mutate(2);
-		});
+    describe("useDeleteFormField", () => {
+        it("removes field from cache, invalidates, and shows success toast", async () => {
+            const setQueryDataSpy = vi.spyOn(queryClient, "setQueryData");
+            const invalidateQueriesSpy = vi
+                .spyOn(queryClient, "invalidateQueries")
+                .mockResolvedValue(undefined);
+            const deleteFormField = vi.fn().mockResolvedValue(undefined);
+            const wrapper = createWrapper({
+                adminFormFieldService: {deleteFormField} as any,
+            });
+            const {result} = renderHook(() => useDeleteFormField(1), {wrapper});
 
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(deleteFormField).toHaveBeenCalledWith(1, 2);
-	});
+            await act(async () => {
+                result.current.mutate(2);
+            });
 
-	it("handles error", async () => {
-		const deleteFormField = vi.fn().mockRejectedValue(new Error("fail"));
-		const wrapper = createWrapper({adminFormFieldService: {deleteFormField} as any});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            expect(deleteFormField).toHaveBeenCalledWith(1, 2);
 
-		const {result} = renderHook(() => useDeleteFormField(1), {wrapper});
+            const fieldsCall = findSetQueryDataCall(
+                setQueryDataSpy,
+                queryKeys.formFields.byProject(1),
+            );
+            expect(fieldsCall).toBeDefined();
+            const fieldsUpdater = fieldsCall?.[1] as
+                | ((fields: Array<{id: number; label: string}>) => Array<{id: number; label: string}>)
+                | undefined;
+            expect(
+                fieldsUpdater?.([
+                    {id: 1, label: "A"},
+                    {id: 2, label: "B"},
+                ]),
+            ).toEqual([{id: 1, label: "A"}]);
 
-		await act(async () => {
-			result.current.mutate(2);
-		});
+            expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+                queryKey: queryKeys.formFields.byProject(1),
+            });
+            expect(mocks.toastSuccess).toHaveBeenCalledWith(
+                "Field deleted successfully",
+            );
+        });
 
-		await waitFor(() => expect(result.current.isError).toBe(true));
-	});
-});
+        it("shows error toast when delete form field fails", async () => {
+            const deleteFormField = vi.fn().mockRejectedValue(new Error("fail"));
+            const wrapper = createWrapper({
+                adminFormFieldService: {deleteFormField} as any,
+            });
+            const {result} = renderHook(() => useDeleteFormField(1), {wrapper});
 
-describe("useUpdateFormField", () => {
-	it("calls adminFormFieldService.updateFormField", async () => {
-		const updateFormField = vi.fn().mockResolvedValue({id: 1});
-		const wrapper = createWrapper({adminFormFieldService: {updateFormField} as any});
+            await act(async () => {
+                result.current.mutate(2);
+            });
 
-		const {result} = renderHook(() => useUpdateFormField(1), {wrapper});
+            await waitFor(() => expect(result.current.isError).toBe(true));
+            expect(mocks.toastError).toHaveBeenCalledWith(
+                "Failed to delete field",
+            );
+        });
+    });
 
-		await act(async () => {
-			result.current.mutate({fieldId: 2, data: {label: "Updated"}});
-		});
+    describe("useUpdateFormField", () => {
+        it("updates field and invalidates project fields query", async () => {
+            const invalidateQueriesSpy = vi
+                .spyOn(queryClient, "invalidateQueries")
+                .mockResolvedValue(undefined);
+            const updateFormField = vi.fn().mockResolvedValue({id: 1});
+            const wrapper = createWrapper({
+                adminFormFieldService: {updateFormField} as any,
+            });
+            const {result} = renderHook(() => useUpdateFormField(1), {wrapper});
 
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(updateFormField).toHaveBeenCalledWith(1, 2, {label: "Updated"});
-	});
+            await act(async () => {
+                result.current.mutate({
+                    fieldId: 2,
+                    data: {label: "Updated"},
+                });
+            });
 
-	it("handles error", async () => {
-		const updateFormField = vi.fn().mockRejectedValue(new Error("fail"));
-		const wrapper = createWrapper({adminFormFieldService: {updateFormField} as any});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            expect(updateFormField).toHaveBeenCalledWith(1, 2, {
+                label: "Updated",
+            });
+            expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+                queryKey: queryKeys.formFields.byProject(1),
+            });
+            expect(mocks.toastSuccess).toHaveBeenCalledWith(
+                "Field updated successfully",
+            );
+        });
 
-		const {result} = renderHook(() => useUpdateFormField(1), {wrapper});
+        it("shows error toast when update form field fails", async () => {
+            const updateFormField = vi.fn().mockRejectedValue(new Error("fail"));
+            const wrapper = createWrapper({
+                adminFormFieldService: {updateFormField} as any,
+            });
+            const {result} = renderHook(() => useUpdateFormField(1), {wrapper});
 
-		await act(async () => {
-			result.current.mutate({fieldId: 2, data: {label: "Updated"}});
-		});
+            await act(async () => {
+                result.current.mutate({
+                    fieldId: 2,
+                    data: {label: "Updated"},
+                });
+            });
 
-		await waitFor(() => expect(result.current.isError).toBe(true));
-	});
-});
+            await waitFor(() => expect(result.current.isError).toBe(true));
+            expect(mocks.toastError).toHaveBeenCalledWith(
+                "Failed to update field",
+            );
+        });
+    });
 
-describe("useReorderFormFields", () => {
-	it("calls adminFormFieldService.reorderFormFields", async () => {
-		const reorderFormFields = vi.fn().mockResolvedValue([{id: 1}, {id: 2}]);
-		const wrapper = createWrapper({adminFormFieldService: {reorderFormFields} as any});
+    describe("useReorderFormFields", () => {
+        it("writes returned field order to cache on success", async () => {
+            const updatedFields = [
+                {
+                    id: 2,
+                    projectId: 1,
+                    label: "B",
+                    type: "text",
+                    isRequired: false,
+                    position: 0,
+                },
+                {
+                    id: 1,
+                    projectId: 1,
+                    label: "A",
+                    type: "text",
+                    isRequired: false,
+                    position: 1,
+                },
+            ];
+            const setQueryDataSpy = vi.spyOn(queryClient, "setQueryData");
+            const reorderFormFields = vi.fn().mockResolvedValue(updatedFields);
+            const wrapper = createWrapper({
+                adminFormFieldService: {reorderFormFields} as any,
+            });
+            const {result} = renderHook(() => useReorderFormFields(1), {wrapper});
 
-		const {result} = renderHook(() => useReorderFormFields(1), {wrapper});
+            await act(async () => {
+                result.current.mutate([2, 1]);
+            });
 
-		await act(async () => {
-			result.current.mutate([2, 1]);
-		});
+            await waitFor(() => expect(result.current.isSuccess).toBe(true));
+            expect(reorderFormFields).toHaveBeenCalledWith(1, [2, 1]);
+            expect(setQueryDataSpy).toHaveBeenCalledWith(
+                queryKeys.formFields.byProject(1),
+                updatedFields,
+            );
+        });
 
-		await waitFor(() => expect(result.current.isSuccess).toBe(true));
-		expect(reorderFormFields).toHaveBeenCalledWith(1, [2, 1]);
-	});
+        it("shows error toast and invalidates fields query when reorder fails", async () => {
+            const invalidateQueriesSpy = vi
+                .spyOn(queryClient, "invalidateQueries")
+                .mockResolvedValue(undefined);
+            const reorderFormFields = vi.fn().mockRejectedValue(new Error("fail"));
+            const wrapper = createWrapper({
+                adminFormFieldService: {reorderFormFields} as any,
+            });
+            const {result} = renderHook(() => useReorderFormFields(1), {wrapper});
 
-	it("handles error", async () => {
-		const reorderFormFields = vi.fn().mockRejectedValue(new Error("fail"));
-		const wrapper = createWrapper({adminFormFieldService: {reorderFormFields} as any});
+            await act(async () => {
+                result.current.mutate([2, 1]);
+            });
 
-		const {result} = renderHook(() => useReorderFormFields(1), {wrapper});
-
-		await act(async () => {
-			result.current.mutate([2, 1]);
-		});
-
-		await waitFor(() => expect(result.current.isError).toBe(true));
-	});
+            await waitFor(() => expect(result.current.isError).toBe(true));
+            expect(mocks.toastError).toHaveBeenCalledWith(
+                "Failed to reorder fields",
+            );
+            expect(invalidateQueriesSpy).toHaveBeenCalledWith({
+                queryKey: queryKeys.formFields.byProject(1),
+            });
+        });
+    });
 });

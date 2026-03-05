@@ -1,5 +1,5 @@
 import {describe, expect, it, vi, beforeEach} from "vitest";
-import {screen} from "@testing-library/react";
+import {fireEvent, screen} from "@testing-library/react";
 import {UserManagement} from "../UserManagement";
 import {renderWithProviders} from "@/test-utils";
 
@@ -8,10 +8,12 @@ vi.mock("@tanstack/react-router", () => ({
 }));
 
 const mockUseAdminUsers = vi.fn();
+const mockUseAdminProjects = vi.fn();
+const mockUseAdminUserProjects = vi.fn();
 vi.mock("@/hooks/queries/useAdminQueries", () => ({
 	useAdminUsers: (...args: any[]) => mockUseAdminUsers(...args),
-	useAdminProjects: () => ({data: [{id: 10, name: "Project X"}], isLoading: false, error: null}),
-	useAdminUserProjects: () => ({data: [{id: 10, name: "Project X"}], isLoading: false, error: null}),
+	useAdminProjects: (...args: any[]) => mockUseAdminProjects(...args),
+	useAdminUserProjects: (...args: any[]) => mockUseAdminUserProjects(...args),
 }));
 
 vi.mock("@/hooks/queries/useUserQueries", () => ({
@@ -26,6 +28,10 @@ vi.mock("@/hooks/mutations/useAdminMutations", () => ({
 	useAdminChangeRole: () => ({mutateAsync: vi.fn(), isPending: false}),
 }));
 
+vi.mock("@/components/users/CreateUserModel", () => ({
+	CreateUserModal: ({open}: {open: boolean}) => (open ? <div>CreateUserModal Open</div> : null),
+}));
+
 const mockUsers = [
 	{id: 1, username: "alice", isAdmin: true, isActive: true, mutantsReviewed: 50},
 	{id: 2, username: "bob", isAdmin: false, isActive: true, mutantsReviewed: 20},
@@ -34,87 +40,100 @@ const mockUsers = [
 
 describe("UserManagement", () => {
 	beforeEach(() => {
+		mockUseAdminUsers.mockReset();
+		mockUseAdminProjects.mockReset();
+		mockUseAdminUserProjects.mockReset();
 		mockUseAdminUsers.mockReturnValue({data: mockUsers, isLoading: false, error: null});
+		mockUseAdminProjects.mockReturnValue({
+			data: [
+				{id: 10, name: "Project X"},
+				{id: 11, name: "Project Y"},
+			],
+			isLoading: false,
+			error: null,
+		});
+		mockUseAdminUserProjects.mockImplementation((userId: number) => {
+			if (userId === 1) {
+				return {
+					data: [
+						{id: 10, name: "Project X"},
+						{id: 11, name: "Project Y"},
+					],
+					isLoading: false,
+					error: null,
+				};
+			}
+
+			if (userId === 2) {
+				return {
+					data: [{id: 10, name: "Project X"}],
+					isLoading: false,
+					error: null,
+				};
+			}
+
+			return {data: [], isLoading: false, error: null};
+		});
 	});
 
-	it("renders page title", () => {
-		renderWithProviders(<UserManagement />);
-		expect(screen.getByText("User Management")).toBeInTheDocument();
-	});
-
-	it("renders Add User button", () => {
-		renderWithProviders(<UserManagement />);
-		expect(screen.getByText("Add User")).toBeInTheDocument();
-	});
-
-	it("renders search input", () => {
-		renderWithProviders(<UserManagement />);
-		expect(screen.getByLabelText("Search users")).toBeInTheDocument();
-	});
-
-	it("renders user rows", () => {
+	it("renders users returned from query", () => {
 		renderWithProviders(<UserManagement />);
 		expect(screen.getByText("alice")).toBeInTheDocument();
 		expect(screen.getByText("bob")).toBeInTheDocument();
 		expect(screen.getByText("charlie")).toBeInTheDocument();
 	});
 
-	it("shows Admin badge for admin user", () => {
+	it("filters displayed users by search input", () => {
 		renderWithProviders(<UserManagement />);
-		expect(screen.getByText("Admin")).toBeInTheDocument();
+		fireEvent.change(screen.getByLabelText("Search users"), {
+			target: {value: "char"},
+		});
+
+		expect(screen.getByText("charlie")).toBeInTheDocument();
+		expect(screen.queryByText("alice")).not.toBeInTheDocument();
+		expect(screen.queryByText("bob")).not.toBeInTheDocument();
 	});
 
-	it("shows Deactivated badge for inactive user", () => {
+	it("shows an empty-table message when search has no matches", () => {
 		renderWithProviders(<UserManagement />);
-		expect(screen.getByText("Deactivated")).toBeInTheDocument();
-	});
+		fireEvent.change(screen.getByLabelText("Search users"), {
+			target: {value: "nobody"},
+		});
 
-	it("shows Member badge for regular user", () => {
-		renderWithProviders(<UserManagement />);
-		expect(screen.getByText("Member")).toBeInTheDocument();
-	});
-
-	it("renders table headers", () => {
-		renderWithProviders(<UserManagement />);
-		expect(screen.getByText("User")).toBeInTheDocument();
-		expect(screen.getByText("Role")).toBeInTheDocument();
-		expect(screen.getByText("Projects")).toBeInTheDocument();
-		expect(screen.getByText("Mutants Reviewed")).toBeInTheDocument();
-	});
-
-	it("shows loading state", () => {
-		mockUseAdminUsers.mockReturnValue({data: [], isLoading: true, error: null});
-		const {container} = renderWithProviders(<UserManagement />);
-		// Loader2 spinner should be rendered
-		expect(container.querySelector(".animate-spin")).toBeInTheDocument();
-	});
-
-	it("shows error state", () => {
-		mockUseAdminUsers.mockReturnValue({data: [], isLoading: false, error: new Error("fail")});
-		renderWithProviders(<UserManagement />);
-		expect(screen.getByText("Failed to load users. Please try again.")).toBeInTheDocument();
-	});
-
-	it("shows no users found when table is empty", () => {
-		mockUseAdminUsers.mockReturnValue({data: [], isLoading: false, error: null});
-		renderWithProviders(<UserManagement />);
 		expect(screen.getByText("No users found")).toBeInTheDocument();
 	});
 
-	it("renders user project badges", () => {
+	it("opens create user modal when Add User is clicked", () => {
 		renderWithProviders(<UserManagement />);
-		// useAdminUserProjects returns Project X for all users
-		expect(screen.getAllByText("Project X").length).toBeGreaterThan(0);
+		fireEvent.click(screen.getByRole("button", {name: "Add User"}));
+
+		expect(screen.getByText("CreateUserModal Open")).toBeInTheDocument();
 	});
 
-	it("renders mutants reviewed count", () => {
+	it("shows role badges based on active/admin status", () => {
 		renderWithProviders(<UserManagement />);
-		expect(screen.getByText("50")).toBeInTheDocument();
-		expect(screen.getByText("20")).toBeInTheDocument();
+		expect(screen.getByText("Admin")).toBeInTheDocument();
+		expect(screen.getByText("Member")).toBeInTheDocument();
+		expect(screen.getByText("Deactivated")).toBeInTheDocument();
 	});
 
-	it("renders subtitle", () => {
+	it("shows project summary badges from per-user project assignments", () => {
 		renderWithProviders(<UserManagement />);
-		expect(screen.getByText("Manage user accounts, roles, and permissions")).toBeInTheDocument();
+		expect(screen.getAllByText("Project X").length).toBeGreaterThanOrEqual(1);
+		expect(screen.getByText("Project Y")).toBeInTheDocument();
+		expect(screen.getByText("None")).toBeInTheDocument();
+	});
+
+	it("shows loading state while user query is pending", () => {
+		mockUseAdminUsers.mockReturnValue({data: [], isLoading: true, error: null});
+		const {container} = renderWithProviders(<UserManagement />);
+
+		expect(container.querySelector(".animate-spin")).toBeInTheDocument();
+	});
+
+	it("shows error state when user query fails", () => {
+		mockUseAdminUsers.mockReturnValue({data: [], isLoading: false, error: new Error("fail")});
+		renderWithProviders(<UserManagement />);
+		expect(screen.getByText("Failed to load users. Please try again.")).toBeInTheDocument();
 	});
 });

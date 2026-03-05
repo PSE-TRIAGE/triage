@@ -21,27 +21,30 @@ vi.mock("@/components/projectSettings/ProjectMembersTab", () => ({
 }));
 
 describe("ProjectSettings", () => {
-	it("renders page title", () => {
+	it("renders all tab triggers", () => {
 		renderWithProviders(<ProjectSettings />);
-		expect(screen.getByText("Project Management")).toBeInTheDocument();
+		expect(screen.getByRole("tab", {name: "Form Builder"})).toBeInTheDocument();
+		expect(screen.getByRole("tab", {name: "Algorithm Settings"})).toBeInTheDocument();
+		expect(screen.getByRole("tab", {name: "Export Data"})).toBeInTheDocument();
+		expect(screen.getByRole("tab", {name: "Members"})).toBeInTheDocument();
+		expect(screen.getByRole("tab", {name: "Settings"})).toBeInTheDocument();
 	});
 
-	it("renders tab triggers", () => {
-		renderWithProviders(<ProjectSettings />);
-		expect(screen.getByText("Form Builder")).toBeInTheDocument();
-		expect(screen.getByText("Algorithm Settings")).toBeInTheDocument();
-		expect(screen.getByText("Export Data")).toBeInTheDocument();
-		expect(screen.getByText("Members")).toBeInTheDocument();
-		expect(screen.getByText("Settings")).toBeInTheDocument();
-	});
-
-	it("shows Form Builder tab by default", () => {
+	it("shows Form Builder content by default", () => {
 		renderWithProviders(<ProjectSettings />);
 		expect(screen.getByText("FormBuilderTab")).toBeInTheDocument();
+		expect(screen.queryByText("ProjectMembersTab")).not.toBeInTheDocument();
 	});
 
-	it("renders description", () => {
+	it("marks the first tab as selected by default", () => {
 		renderWithProviders(<ProjectSettings />);
+		expect(screen.getByRole("tab", {name: "Form Builder"})).toHaveAttribute("aria-selected", "true");
+		expect(screen.getByRole("tab", {name: "Members"})).toHaveAttribute("aria-selected", "false");
+	});
+
+	it("renders page context header", () => {
+		renderWithProviders(<ProjectSettings />);
+		expect(screen.getByText("Project Management")).toBeInTheDocument();
 		expect(screen.getByText(/Configure data sources/)).toBeInTheDocument();
 	});
 });

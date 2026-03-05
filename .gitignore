@@ -13,13 +13,14 @@ count.txt
 .nitro
 .tanstack
 .wrangler
+.tmp/
 routeTree.gen.ts
 
 # Playwright
-frontend/test-results/
+frontend/playwright/.cache
 frontend/playwright-report/
-frontend/playwright/.cache/
-.tmp/
+frontend/coverage/
+frontend/test-results/
 
 # Backend
 venv

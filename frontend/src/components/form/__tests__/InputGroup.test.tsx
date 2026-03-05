@@ -35,20 +35,35 @@ describe("InputGroup", () => {
     });
 
     it("renders as password type with toggle button", () => {
-        render(<InputGroup label="Password" type="password" />);
-        const input = screen
-            .getByLabelText("Password", {exact: false})
-            .closest("div")
-            ?.querySelector("input");
+        render(
+            <InputGroup
+                label="Password"
+                type="password"
+                placeholder="Enter password"
+            />,
+        );
+        const input = screen.getByPlaceholderText("Enter password");
         expect(input).toHaveAttribute("type", "password");
-        expect(screen.getByLabelText("Show password")).toBeInTheDocument();
+        expect(
+            screen.getByRole("button", {name: "Show password"}),
+        ).toBeInTheDocument();
     });
 
     it("toggles password visibility", () => {
-        render(<InputGroup label="Password" type="password" />);
-        const toggleBtn = screen.getByLabelText("Show password");
+        render(
+            <InputGroup
+                label="Password"
+                type="password"
+                placeholder="Enter password"
+            />,
+        );
+        const input = screen.getByPlaceholderText("Enter password");
+        const toggleBtn = screen.getByRole("button", {name: "Show password"});
         fireEvent.click(toggleBtn);
-        expect(screen.getByLabelText("Hide password")).toBeInTheDocument();
+        expect(input).toHaveAttribute("type", "text");
+        expect(
+            screen.getByRole("button", {name: "Hide password"}),
+        ).toBeInTheDocument();
     });
 
     it("accepts placeholder prop", () => {

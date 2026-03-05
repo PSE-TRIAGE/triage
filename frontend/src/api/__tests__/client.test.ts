@@ -29,6 +29,42 @@ describe("apiClient", () => {
     beforeEach(() => {
         vi.restoreAllMocks();
         localStorage.clear();
+        window.location.href = "";
+        window.location.pathname = "/";
+    });
+
+    it("parses successful JSON responses with schema validation", async () => {
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response(JSON.stringify({id: 1, name: "Project"}), {
+                status: 200,
+                headers: {"content-type": "application/json"},
+            }),
+        );
+
+        const {apiClient} = await import("../client");
+        const {z} = await import("zod");
+        const result = await apiClient.get(
+            "/test",
+            z.object({id: z.number(), name: z.string()}),
+        );
+
+        expect(result).toEqual({id: 1, name: "Project"});
+    });
+
+    it("throws when successful JSON response fails schema validation", async () => {
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response(JSON.stringify({id: "not-a-number"}), {
+                status: 200,
+                headers: {"content-type": "application/json"},
+            }),
+        );
+
+        const {apiClient} = await import("../client");
+        const {z, ZodError} = await import("zod");
+
+        await expect(
+            apiClient.get("/test", z.object({id: z.number()})),
+        ).rejects.toBeInstanceOf(ZodError);
     });
 
     it("includes Authorization header when token exists", async () => {
@@ -54,6 +90,22 @@ describe("apiClient", () => {
                 }),
             }),
         );
+    });
+
+    it("does not include Authorization header when token does not exist", async () => {
+        const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response(JSON.stringify({id: 1}), {
+                status: 200,
+                headers: {"content-type": "application/json"},
+            }),
+        );
+
+        const {apiClient} = await import("../client");
+        const {z} = await import("zod");
+        await apiClient.get("/test", z.object({id: z.number()}));
+
+        const call = fetchSpy.mock.calls[0];
+        expect(call[1]?.headers).not.toHaveProperty("Authorization");
     });
 
     it("throws ApiError on non-ok response", async () => {
@@ -87,6 +139,26 @@ describe("apiClient", () => {
 
         await expect(apiClient.get("/test", z.any())).rejects.toThrow(ApiError);
         expect(localStorage.getItem("auth_token")).toBeNull();
+    });
+
+    it("handles 401 by redirecting to /login when not already on login page", async () => {
+        localStorage.setItem("auth_token", "old-token");
+        window.location.pathname = "/dashboard";
+        window.location.href = "";
+
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response(JSON.stringify({detail: "Unauthorized"}), {
+                status: 401,
+                statusText: "Unauthorized",
+                headers: {"content-type": "application/json"},
+            }),
+        );
+
+        const {apiClient} = await import("../client");
+        const {z} = await import("zod");
+
+        await expect(apiClient.get("/test", z.any())).rejects.toThrow(ApiError);
+        expect(window.location.href).toBe("/login");
     });
 
     it("POST sends JSON body", async () => {
@@ -190,6 +262,22 @@ describe("apiClient", () => {
         await expect(apiClient.downloadFile("/test")).rejects.toThrow(ApiError);
     });
 
+    it("downloadFile returns blob on success", async () => {
+        vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response(new Blob(["hello world"], {type: "text/plain"}), {
+                status: 200,
+                statusText: "OK",
+            }),
+        );
+
+        const {apiClient} = await import("../client");
+        const blob = await apiClient.downloadFile("/test");
+
+        expect(blob).toBeInstanceOf(Blob);
+        expect(blob.type).toContain("text/plain");
+        expect(blob.size).toBeGreaterThan(0);
+    });
+
     it("uploadFile sends FormData", async () => {
         const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
             new Response(JSON.stringify({id: 1}), {
@@ -211,6 +299,30 @@ describe("apiClient", () => {
         const call = fetchSpy.mock.calls[0];
         expect(call[1]?.body).toBeInstanceOf(FormData);
         expect(call[1]?.method).toBe("POST");
+    });
+
+    it("uploadFile appends additional form fields", async () => {
+        const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+            new Response(JSON.stringify({id: 1}), {
+                status: 200,
+                headers: {"content-type": "application/json"},
+            }),
+        );
+
+        const {apiClient} = await import("../client");
+        const {z} = await import("zod");
+        const file = new File(["content"], "test.xml", {type: "text/xml"});
+        await apiClient.uploadFile(
+            "/upload",
+            z.object({id: z.number()}),
+            file,
+            {projectId: "123", source: "web"},
+        );
+
+        const body = fetchSpy.mock.calls[0][1]?.body as FormData;
+        expect(body.get("file")).toBe(file);
+        expect(body.get("projectId")).toBe("123");
+        expect(body.get("source")).toBe("web");
     });
 
     it("uploadFile supports PUT method", async () => {
