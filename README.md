@@ -87,3 +87,24 @@ To initialize the system, a default administrator account is created automatical
 
 > **⚠️ Security Warning:** Please log in and change the password immediately after the first deployment.
 
+### 🧪 End-to-End UI Tests
+
+Run the E2E suite (local and CI use the same entrypoint):
+
+```bash
+python3 scripts/run_e2e.py
+```
+
+The runner will:
+- set up a disposable PostgreSQL container
+- start the backend against that database
+- run frontend Playwright E2E tests
+- clean up started services when tests finish
+
+Optional environment variables:
+- `E2E_INSTALL_FRONTEND_DEPS=0|1|auto` (default: `auto`)
+- `E2E_INSTALL_BACKEND_DEPS=0|1|auto` (default: `auto`)
+- `E2E_INSTALL_PLAYWRIGHT=0|1|auto` (default: `auto`)
+- `E2E_FRONTEND_HOST` / `E2E_FRONTEND_PORT` (defaults: `localhost` / `3000`)
+- `E2E_BACKEND_HOST` / `E2E_BACKEND_PORT` (defaults: `127.0.0.1` / `8000`)
+- `E2E_KEEP_STACK=1` (keep DB container running after test run)

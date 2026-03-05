@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mutations>
+    <mutation detected="true" status="KILLED" numberOfTestsRun="3">
+        <sourceFile>Bar.java</sourceFile>
+        <mutatedClass>com.example.Bar</mutatedClass>
+        <mutatedMethod>compute</mutatedMethod>
+        <methodDescription>()I</methodDescription>
+        <lineNumber>42</lineNumber>
+        <mutator>MATH</mutator>
+        <killingTest>com.example.BarTest.test1</killingTest>
+        <description>replaced + with -</description>
+    </mutation>
+    <mutation detected="false" status="SURVIVED" numberOfTestsRun="1">
+        <sourceFile>Bar.java</sourceFile>
+        <mutatedClass>com.example.Bar</mutatedClass>
+        <mutatedMethod>compute</mutatedMethod>
+        <methodDescription>()I</methodDescription>
+        <lineNumber>55</lineNumber>
+        <mutator>NEGATE_CONDITIONALS</mutator>
+        <killingTest></killingTest>
+        <description>negated condition</description>
+    </mutation>
+</mutations>
