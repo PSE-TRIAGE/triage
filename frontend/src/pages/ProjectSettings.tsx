@@ -5,7 +5,16 @@ import {AlgorithmSettingsTab} from "@/components/projectSettings/AlgorithmSettin
 import {ExportDataTab} from "@/components/projectSettings/ExportDataTab";
 import {ProjectSettingsTab} from "@/components/projectSettings/ProjectSettingsTab";
 import {ProjectMembersTab} from "@/components/projectSettings/ProjectMembersTab";
-import {Sliders, FileDown, LayoutList, Settings, Users} from "lucide-react";
+import {
+    ArrowLeft,
+    Sliders,
+    FileDown,
+    LayoutList,
+    Settings,
+    Users,
+} from "lucide-react";
+import {Button} from "@/components/ui/button";
+import {useNavigate} from "@tanstack/react-router";
 
 const getTabItems = () => [
     {
@@ -42,12 +51,23 @@ const getTabItems = () => [
 
 export function ProjectSettings() {
     const [activeTab, setActiveTab] = useState("form");
+    const navigate = useNavigate();
     const tabItems = getTabItems();
 
     return (
         <div className="bg-background mb-24">
             <div className="max-w-[1440px] mx-auto px-6 lg:px-8 py-8">
                 <div className="flex flex-col gap-2 mb-8">
+                    <Button
+                        type="button"
+                        variant="ghost"
+                        onClick={() => navigate({to: "/dashboard"})}
+                        aria-label="Back to projects dashboard"
+                        className="w-fit px-0 text-muted-foreground hover:text-foreground"
+                    >
+                        <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+                        Back to Projects
+                    </Button>
                     <h1 className="text-4xl font-bold text-foreground">
                         Project Management
                     </h1>
