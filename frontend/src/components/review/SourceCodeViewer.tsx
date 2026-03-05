@@ -1,11 +1,17 @@
-import {FileCode, Loader2, AlertCircle, ChevronUp, ChevronDown} from "lucide-react";
-import {useMutantSourceCode} from "@/hooks/queries/useMutantQueries";
-import {useMutantStore} from "@/stores/mutantStore";
-import {ScrollArea} from "@/components/ui/scroll-area";
-import {useState, useMemo} from "react";
-import {useTheme} from "@/components/utils/theme-provider";
+import {
+    AlertCircle,
+    ChevronDown,
+    ChevronUp,
+    FileCode,
+    Loader2,
+} from "lucide-react";
 import {Highlight, themes} from "prism-react-renderer";
 import Prism from "prismjs";
+import {useMemo, useState} from "react";
+import {ScrollArea} from "@/components/ui/scroll-area";
+import {useTheme} from "@/components/utils/theme-provider";
+import {useMutantSourceCode} from "@/hooks/queries/useMutantQueries";
+import {useMutantStore} from "@/stores/mutantStore";
 import "prismjs/components/prism-java";
 
 const INITIAL_CONTEXT = 5;
@@ -29,11 +35,21 @@ const lightTheme = {
 
 export function SourceCodeViewer() {
     const selectedMutant = useMutantStore((state) => state.selectedMutant);
-    const {data: sourceCode, isLoading, error} = useMutantSourceCode(selectedMutant?.id);
+    const {
+        data: sourceCode,
+        isLoading,
+        error,
+    } = useMutantSourceCode(selectedMutant?.id);
     const {theme} = useTheme();
-    const [expandedContext, setExpandedContext] = useState({above: INITIAL_CONTEXT, below: INITIAL_CONTEXT});
+    const [expandedContext, setExpandedContext] = useState({
+        above: INITIAL_CONTEXT,
+        below: INITIAL_CONTEXT,
+    });
 
-    const prismTheme = useMemo(() => (theme === "dark" ? darkTheme : lightTheme), [theme]);
+    const prismTheme = useMemo(
+        () => (theme === "dark" ? darkTheme : lightTheme),
+        [theme],
+    );
 
     if (!selectedMutant) {
         return null;
@@ -69,12 +85,26 @@ export function SourceCodeViewer() {
                 </span>
             </div>
             <ScrollArea className="flex-1">
-                <Highlight prism={Prism} theme={prismTheme} code={content} language="java">
+                <Highlight
+                    prism={Prism}
+                    theme={prismTheme}
+                    code={content}
+                    language="java"
+                >
                     {({tokens, getLineProps, getTokenProps}) => {
                         const totalLines = tokens.length;
-                        const startLine = Math.max(1, lineNumber - expandedContext.above);
-                        const endLine = Math.min(totalLines, lineNumber + expandedContext.below);
-                        const visibleTokens = tokens.slice(startLine - 1, endLine);
+                        const startLine = Math.max(
+                            1,
+                            lineNumber - expandedContext.above,
+                        );
+                        const endLine = Math.min(
+                            totalLines,
+                            lineNumber + expandedContext.below,
+                        );
+                        const visibleTokens = tokens.slice(
+                            startLine - 1,
+                            endLine,
+                        );
 
                         const hasHiddenLinesAbove = startLine > 1;
                         const hasHiddenLinesBelow = endLine < totalLines;
@@ -82,24 +112,36 @@ export function SourceCodeViewer() {
                         const hiddenLinesBelow = totalLines - endLine;
 
                         const showAllAbove = () => {
-                            setExpandedContext((prev) => ({...prev, above: lineNumber - 1}));
+                            setExpandedContext((prev) => ({
+                                ...prev,
+                                above: lineNumber - 1,
+                            }));
                         };
 
                         const showAllBelow = () => {
-                            setExpandedContext((prev) => ({...prev, below: totalLines - lineNumber}));
+                            setExpandedContext((prev) => ({
+                                ...prev,
+                                below: totalLines - lineNumber,
+                            }));
                         };
 
                         const expandAbove = () => {
                             setExpandedContext((prev) => ({
                                 ...prev,
-                                above: Math.min(prev.above + EXPAND_BY, lineNumber - 1),
+                                above: Math.min(
+                                    prev.above + EXPAND_BY,
+                                    lineNumber - 1,
+                                ),
                             }));
                         };
 
                         const expandBelow = () => {
                             setExpandedContext((prev) => ({
                                 ...prev,
-                                below: Math.min(prev.below + EXPAND_BY, totalLines - lineNumber),
+                                below: Math.min(
+                                    prev.below + EXPAND_BY,
+                                    totalLines - lineNumber,
+                                ),
                             }));
                         };
 
@@ -116,13 +158,14 @@ export function SourceCodeViewer() {
 
                                 {visibleTokens.map((line, idx) => {
                                     const currentLineNum = startLine + idx;
-                                    const isMutationLine = currentLineNum === lineNumber;
+                                    const isMutationLine =
+                                        currentLineNum === lineNumber;
 
                                     return (
                                         <div
                                             key={currentLineNum}
                                             {...getLineProps({line})}
-                                            className={`flex ${
+                                            className={`flex min-w-0 ${
                                                 isMutationLine
                                                     ? "bg-destructive/20 border-l-2 border-destructive"
                                                     : ""
@@ -131,11 +174,29 @@ export function SourceCodeViewer() {
                                             <span className="select-none text-right px-3 py-0.5 text-muted-foreground/50 w-12 shrink-0">
                                                 {currentLineNum}
                                             </span>
-                                            <pre className="px-3 py-0.5 whitespace-pre overflow-x-auto flex-1">
-                                                {line.map((token, tokenIdx) => (
-                                                    // biome-ignore lint/suspicious/noArrayIndexKey: tokens are static and have no stable IDs
-                                                    <span key={tokenIdx} {...getTokenProps({token})} />
-                                                ))}
+                                            <pre className="px-3 py-0.5 whitespace-pre-wrap break-words [overflow-wrap:anywhere] flex-1 min-w-0">
+                                                {(() => {
+                                                    let tokenOffset = 0;
+                                                    let tokenSerial = 0;
+                                                    return line.map((token) => {
+                                                        const key = `${token.types.join("-")}:${tokenOffset}:${tokenSerial}`;
+                                                        tokenOffset +=
+                                                            token.content
+                                                                .length;
+                                                        tokenSerial += 1;
+
+                                                        return (
+                                                            <span
+                                                                key={key}
+                                                                {...getTokenProps(
+                                                                    {
+                                                                        token,
+                                                                    },
+                                                                )}
+                                                            />
+                                                        );
+                                                    });
+                                                })()}
                                             </pre>
                                         </div>
                                     );
