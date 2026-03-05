@@ -1,4 +1,4 @@
-import {test, expect} from "@playwright/experimental-ct-react";
+import {expect, test} from "@playwright/experimental-ct-react";
 import {SourceCodeViewer} from "@/components/review/SourceCodeViewer";
 import {makeMutant} from "../pw-test-utils";
 
@@ -68,5 +68,48 @@ test.describe("SourceCodeViewer", () => {
         });
 
         await expect(component.getByText("com.example.Foo")).toBeVisible();
+    });
+
+    test("wraps long source lines without horizontal overflow", async ({
+        mount,
+    }) => {
+        const veryLongToken = "reallyLongIdentifier".repeat(20);
+        const content = [
+            "public class Foo {",
+            "    public String value() {",
+            `        return ${veryLongToken};`,
+            "    }",
+            "}",
+        ].join("\n");
+
+        const component = await mount(
+            <div style={{width: "260px"}}>
+                <SourceCodeViewer />
+            </div>,
+            {
+                hooksConfig: {
+                    mutantStore: {
+                        projectId: 1,
+                        selectedMutant: makeMutant({id: 1, lineNumber: 3}),
+                    },
+                    sourceCode: {
+                        content,
+                        fullyQualifiedName: "com.example.Foo",
+                    },
+                },
+            },
+        );
+
+        await expect(component.getByText("com.example.Foo")).toBeVisible();
+
+        const codeLines = component.locator("pre");
+        const hasHorizontalOverflow = await codeLines.evaluateAll((nodes) =>
+            nodes.some((node) => {
+                const el = node as HTMLElement;
+                return el.scrollWidth > el.clientWidth + 1;
+            }),
+        );
+
+        expect(hasHorizontalOverflow).toBe(false);
     });
 });
