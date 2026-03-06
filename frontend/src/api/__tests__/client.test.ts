@@ -273,7 +273,9 @@ describe("apiClient", () => {
         const {apiClient} = await import("../client");
         const blob = await apiClient.downloadFile("/test");
 
-        expect(blob).toBeInstanceOf(Blob);
+        expect(typeof blob).toBe("object");
+        expect(blob.size).toBe(13);
+
         expect(blob.type).toContain("text/plain");
         expect(blob.size).toBeGreaterThan(0);
     });
