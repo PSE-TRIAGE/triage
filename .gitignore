@@ -1,5 +1,6 @@
 # Frontend
 node_modules
+coverage/
 .vite
 .vite/
 build
@@ -12,13 +13,14 @@ count.txt
 .nitro
 .tanstack
 .wrangler
+.tmp/
 routeTree.gen.ts
 
 # Playwright
-test-results/
-playwright-report/
-playwright/.cache/
-.tmp/
+frontend/playwright/.cache
+frontend/playwright-report/
+frontend/coverage/
+frontend/test-results/
 
 # Backend
 venv

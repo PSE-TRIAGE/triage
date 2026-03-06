@@ -25,7 +25,13 @@ describe("TextareaInputGroup", () => {
     });
 
     it("does not show error when not provided", () => {
-        render(<TextareaInputGroup label="Notes" />);
-        expect(screen.queryByText(/required/i)).not.toBeInTheDocument();
+        const {container} = render(<TextareaInputGroup label="Notes" />);
+        expect(
+            container.querySelector("span.text-destructive.font-medium"),
+        ).toBeNull();
+        expect(screen.getByRole("textbox")).toHaveAttribute(
+            "aria-invalid",
+            "false",
+        );
     });
 });

@@ -27,8 +27,9 @@ describe("useMutantStore", () => {
         });
     });
 
-    it("has correct initial state", () => {
-        const state = useMutantStore.getState();
+    it("exposes the configured default state shape", async () => {
+        const {useMutantStore: freshStore} = await import("../mutantStore");
+        const state = freshStore.getState();
         expect(state.projectId).toBeNull();
         expect(state.selectedMutant).toBeNull();
         expect(state.mutants).toEqual([]);
@@ -58,10 +59,10 @@ describe("useMutantStore", () => {
         expect(useMutantStore.getState().selectedMutant).toBeNull();
     });
 
-    it("setMutants updates mutants array", () => {
+    it("setMutants replaces mutants with the provided list", () => {
         const mutants = [makeMutant({id: 1}), makeMutant({id: 2})];
         useMutantStore.getState().setMutants(mutants);
-        expect(useMutantStore.getState().mutants).toHaveLength(2);
+        expect(useMutantStore.getState().mutants).toEqual(mutants);
     });
 
     it("setIsLoading updates isLoading", () => {
@@ -84,6 +85,18 @@ describe("useMutantStore", () => {
         expect(state.mutants[1].rated).toBe(false);
     });
 
+    it("markMutantAsRated does nothing when mutant id is missing", () => {
+        const mutant = makeMutant({id: 1, rated: false});
+        useMutantStore.getState().setMutants([mutant]);
+        useMutantStore.getState().setSelectedMutant(mutant);
+
+        useMutantStore.getState().markMutantAsRated(999);
+
+        const state = useMutantStore.getState();
+        expect(state.mutants).toEqual([mutant]);
+        expect(state.selectedMutant).toEqual(mutant);
+    });
+
     it("markMutantAsRated also updates selectedMutant if it matches", () => {
         const mutant = makeMutant({id: 3, rated: false});
         useMutantStore.getState().setMutants([mutant]);
@@ -101,5 +114,20 @@ describe("useMutantStore", () => {
         useMutantStore.getState().markMutantAsRated(2);
 
         expect(useMutantStore.getState().selectedMutant?.rated).toBe(false);
+    });
+
+    it("markMutantAsRated returns new objects instead of mutating original mutant", () => {
+        const original = makeMutant({id: 1, rated: false});
+        useMutantStore.getState().setMutants([original]);
+        useMutantStore.getState().setSelectedMutant(original);
+
+        useMutantStore.getState().markMutantAsRated(1);
+
+        const state = useMutantStore.getState();
+        expect(original.rated).toBe(false);
+        expect(state.mutants[0]).not.toBe(original);
+        expect(state.selectedMutant).not.toBe(original);
+        expect(state.mutants[0].rated).toBe(true);
+        expect(state.selectedMutant?.rated).toBe(true);
     });
 });

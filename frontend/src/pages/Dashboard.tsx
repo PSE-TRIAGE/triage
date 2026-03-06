@@ -48,31 +48,35 @@ export function Dashboard() {
                 )}
 
                 {/* Empty State - No Projects */}
-                {filteredProjects.length === 0 && searchQuery.length === 0 && (
-                    <div className="flex flex-col items-center justify-center gap-5 w-full mt-40">
-                        <FolderOpen className="w-20 h-20 text-secondary-foreground mb-5" />
-                        <div className="flex flex-col items-center justify-center gap-2">
-                            <h2 className="text-secondary-foreground">
-                                No projects found
-                            </h2>
-                            <p>
-                                Get started by creating your first mutation
-                                testing project.
-                            </p>
+                {!isLoading &&
+                    filteredProjects.length === 0 &&
+                    searchQuery.length === 0 && (
+                        <div className="flex flex-col items-center justify-center gap-5 w-full mt-40">
+                            <FolderOpen className="w-20 h-20 text-secondary-foreground mb-5" />
+                            <div className="flex flex-col items-center justify-center gap-2">
+                                <h2 className="text-secondary-foreground">
+                                    No projects found
+                                </h2>
+                                <p>
+                                    Get started by creating your first mutation
+                                    testing project.
+                                </p>
+                            </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
                 {/* Empty State - No Search results*/}
-                {filteredProjects.length === 0 && searchQuery.length > 0 && (
-                    <div className="flex flex-col items-center justify-center gap-5 w-full mt-40">
-                        <Search className="w-20 h-20 text-secondary-foreground" />
-                        <p className="text-secondary-foreground text-center">
-                            No projects found for "{searchQuery}". Try a
-                            different search term
-                        </p>
-                    </div>
-                )}
+                {!isLoading &&
+                    filteredProjects.length === 0 &&
+                    searchQuery.length > 0 && (
+                        <div className="flex flex-col items-center justify-center gap-5 w-full mt-40">
+                            <Search className="w-20 h-20 text-secondary-foreground" />
+                            <p className="text-secondary-foreground text-center">
+                                No projects found for "{searchQuery}". Try a
+                                different search term
+                            </p>
+                        </div>
+                    )}
 
                 {/* Projects Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">

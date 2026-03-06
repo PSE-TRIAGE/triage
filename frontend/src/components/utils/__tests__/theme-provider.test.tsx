@@ -1,4 +1,4 @@
-import {fireEvent, render, screen} from "@testing-library/react";
+import {fireEvent, render, screen, waitFor} from "@testing-library/react";
 import {beforeEach, describe, expect, it} from "vitest";
 import {ThemeProvider, useTheme} from "../theme-provider";
 
@@ -23,13 +23,15 @@ describe("ThemeProvider", () => {
         document.documentElement.classList.remove("light", "dark");
     });
 
-    it("provides default theme", () => {
+    it("provides default theme and applies it to document root", () => {
         render(
             <ThemeProvider defaultTheme="dark" storageKey="test-theme">
                 <ThemeConsumer />
             </ThemeProvider>,
         );
-        expect(screen.getByTestId("theme").textContent).toBe("dark");
+        expect(screen.getByTestId("theme")).toHaveTextContent("dark");
+        expect(document.documentElement).toHaveClass("dark");
+        expect(document.documentElement).not.toHaveClass("light");
     });
 
     it("reads theme from localStorage", () => {
@@ -39,17 +41,21 @@ describe("ThemeProvider", () => {
                 <ThemeConsumer />
             </ThemeProvider>,
         );
-        expect(screen.getByTestId("theme").textContent).toBe("light");
+        expect(screen.getByTestId("theme")).toHaveTextContent("light");
     });
 
-    it("updates theme on setTheme", () => {
+    it("updates theme on setTheme and toggles root class", async () => {
         render(
             <ThemeProvider defaultTheme="dark" storageKey="test-theme-toggle">
                 <ThemeConsumer />
             </ThemeProvider>,
         );
         fireEvent.click(screen.getByText("toggle"));
-        expect(screen.getByTestId("theme").textContent).toBe("light");
+        expect(screen.getByTestId("theme")).toHaveTextContent("light");
+        await waitFor(() => {
+            expect(document.documentElement).toHaveClass("light");
+            expect(document.documentElement).not.toHaveClass("dark");
+        });
     });
 
     it("persists theme to localStorage", () => {
@@ -62,19 +68,17 @@ describe("ThemeProvider", () => {
         expect(localStorage.getItem("test-theme-persist")).toBe("light");
     });
 
-    it("applies theme class to document root", () => {
+    it("replaces a pre-existing opposite class when applying theme", async () => {
+        document.documentElement.classList.add("light");
+
         render(
             <ThemeProvider defaultTheme="dark" storageKey="test-theme-class">
                 <ThemeConsumer />
             </ThemeProvider>,
         );
-        expect(document.documentElement.classList.contains("dark")).toBe(true);
-    });
-});
-
-describe("useTheme outside provider", () => {
-    it("returns default theme when used outside provider", () => {
-        render(<ThemeConsumer />);
-        expect(screen.getByTestId("theme").textContent).toBe("dark");
+        await waitFor(() => {
+            expect(document.documentElement).toHaveClass("dark");
+            expect(document.documentElement).not.toHaveClass("light");
+        });
     });
 });
