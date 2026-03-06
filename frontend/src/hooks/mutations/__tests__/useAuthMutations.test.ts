@@ -114,7 +114,9 @@ describe("useAuthMutations", () => {
     describe("useChangePassword", () => {
         it("calls userService.changePassword with request payload", async () => {
             const changePassword = vi.fn().mockResolvedValue(undefined);
-            const wrapper = createWrapper({userService: {changePassword} as any});
+            const wrapper = createWrapper({
+                userService: {changePassword} as any,
+            });
             const {result} = renderHook(() => useChangePassword(), {wrapper});
 
             await act(async () => {
@@ -133,7 +135,9 @@ describe("useAuthMutations", () => {
 
         it("handles change password errors", async () => {
             const changePassword = vi.fn().mockRejectedValue(new Error("fail"));
-            const wrapper = createWrapper({userService: {changePassword} as any});
+            const wrapper = createWrapper({
+                userService: {changePassword} as any,
+            });
             const {result} = renderHook(() => useChangePassword(), {wrapper});
 
             await act(async () => {
@@ -153,7 +157,9 @@ describe("useAuthMutations", () => {
                 .spyOn(queryClient, "invalidateQueries")
                 .mockResolvedValue(undefined);
             const changeUsername = vi.fn().mockResolvedValue(undefined);
-            const wrapper = createWrapper({userService: {changeUsername} as any});
+            const wrapper = createWrapper({
+                userService: {changeUsername} as any,
+            });
             const {result} = renderHook(() => useChangeUsername(), {wrapper});
 
             await act(async () => {
@@ -161,7 +167,9 @@ describe("useAuthMutations", () => {
             });
 
             await waitFor(() => expect(result.current.isSuccess).toBe(true));
-            expect(changeUsername).toHaveBeenCalledWith({new_username: "newuser"});
+            expect(changeUsername).toHaveBeenCalledWith({
+                new_username: "newuser",
+            });
             expect(invalidateQueriesSpy).toHaveBeenCalledWith({
                 queryKey: queryKeys.auth.me,
             });
@@ -173,7 +181,9 @@ describe("useAuthMutations", () => {
                 "invalidateQueries",
             );
             const changeUsername = vi.fn().mockRejectedValue(new Error("fail"));
-            const wrapper = createWrapper({userService: {changeUsername} as any});
+            const wrapper = createWrapper({
+                userService: {changeUsername} as any,
+            });
             const {result} = renderHook(() => useChangeUsername(), {wrapper});
 
             await act(async () => {
@@ -197,7 +207,9 @@ describe("useAuthMutations", () => {
             const wrapper = createWrapper({
                 userService: {deactivateAccount} as any,
             });
-            const {result} = renderHook(() => useDeactivateAccount(), {wrapper});
+            const {result} = renderHook(() => useDeactivateAccount(), {
+                wrapper,
+            });
 
             await act(async () => {
                 result.current.mutate();
@@ -216,11 +228,15 @@ describe("useAuthMutations", () => {
 
         it("shows error toast when account deactivation fails", async () => {
             const clearSpy = vi.spyOn(queryClient, "clear");
-            const deactivateAccount = vi.fn().mockRejectedValue(new Error("fail"));
+            const deactivateAccount = vi
+                .fn()
+                .mockRejectedValue(new Error("fail"));
             const wrapper = createWrapper({
                 userService: {deactivateAccount} as any,
             });
-            const {result} = renderHook(() => useDeactivateAccount(), {wrapper});
+            const {result} = renderHook(() => useDeactivateAccount(), {
+                wrapper,
+            });
 
             await act(async () => {
                 result.current.mutate();

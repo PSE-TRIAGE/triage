@@ -8,10 +8,7 @@ function renderThemeToggle(
     storageKey = "test-toggle-theme",
 ) {
     return render(
-        <ThemeProvider
-            defaultTheme={defaultTheme}
-            storageKey={storageKey}
-        >
+        <ThemeProvider defaultTheme={defaultTheme} storageKey={storageKey}>
             <ThemeToggle />
         </ThemeProvider>,
     );
@@ -26,7 +23,9 @@ describe("ThemeToggle", () => {
     it("renders Dark mode text and switch control", () => {
         renderThemeToggle("dark", "test-toggle-theme-render");
         expect(screen.getByText("Dark mode")).toBeInTheDocument();
-        expect(screen.getByRole("switch", {name: "dark mode toggle"})).toBeInTheDocument();
+        expect(
+            screen.getByRole("switch", {name: "dark mode toggle"}),
+        ).toBeInTheDocument();
     });
 
     it("switch is checked in dark mode", () => {

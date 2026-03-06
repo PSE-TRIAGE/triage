@@ -44,7 +44,9 @@ describe("useAdminMutations", () => {
                 .spyOn(queryClient, "invalidateQueries")
                 .mockResolvedValue(undefined);
             const createUser = vi.fn().mockResolvedValue(undefined);
-            const wrapper = createWrapper({adminUsersService: {createUser} as any});
+            const wrapper = createWrapper({
+                adminUsersService: {createUser} as any,
+            });
             const {result} = renderHook(() => useAdminCreateUser(), {wrapper});
 
             await act(async () => {
@@ -66,7 +68,9 @@ describe("useAdminMutations", () => {
 
         it("shows error toast when create user fails", async () => {
             const createUser = vi.fn().mockRejectedValue(new Error("fail"));
-            const wrapper = createWrapper({adminUsersService: {createUser} as any});
+            const wrapper = createWrapper({
+                adminUsersService: {createUser} as any,
+            });
             const {result} = renderHook(() => useAdminCreateUser(), {wrapper});
 
             await act(async () => {
@@ -74,7 +78,9 @@ describe("useAdminMutations", () => {
             });
 
             await waitFor(() => expect(result.current.isError).toBe(true));
-            expect(mocks.toastError).toHaveBeenCalledWith("Failed to create user");
+            expect(mocks.toastError).toHaveBeenCalledWith(
+                "Failed to create user",
+            );
         });
     });
 
@@ -85,7 +91,9 @@ describe("useAdminMutations", () => {
                 .spyOn(queryClient, "invalidateQueries")
                 .mockResolvedValue(undefined);
             const deleteUser = vi.fn().mockResolvedValue(undefined);
-            const wrapper = createWrapper({adminUsersService: {deleteUser} as any});
+            const wrapper = createWrapper({
+                adminUsersService: {deleteUser} as any,
+            });
             const {result} = renderHook(() => useAdminDeleteUser(), {wrapper});
 
             await act(async () => {
@@ -101,7 +109,9 @@ describe("useAdminMutations", () => {
             );
             expect(usersCall).toBeDefined();
             const usersUpdater = usersCall?.[1] as
-                | ((users: Array<{id: number; username: string}>) => Array<{id: number; username: string}>)
+                | ((
+                      users: Array<{id: number; username: string}>,
+                  ) => Array<{id: number; username: string}>)
                 | undefined;
             expect(
                 usersUpdater?.([
@@ -120,7 +130,9 @@ describe("useAdminMutations", () => {
 
         it("shows error toast when delete fails", async () => {
             const deleteUser = vi.fn().mockRejectedValue(new Error("fail"));
-            const wrapper = createWrapper({adminUsersService: {deleteUser} as any});
+            const wrapper = createWrapper({
+                adminUsersService: {deleteUser} as any,
+            });
             const {result} = renderHook(() => useAdminDeleteUser(), {wrapper});
 
             await act(async () => {
@@ -141,7 +153,9 @@ describe("useAdminMutations", () => {
                 .spyOn(queryClient, "invalidateQueries")
                 .mockResolvedValue(undefined);
             const disableUser = vi.fn().mockResolvedValue(undefined);
-            const wrapper = createWrapper({adminUsersService: {disableUser} as any});
+            const wrapper = createWrapper({
+                adminUsersService: {disableUser} as any,
+            });
             const {result} = renderHook(() => useAdminDisableUser(), {wrapper});
 
             await act(async () => {
@@ -156,7 +170,9 @@ describe("useAdminMutations", () => {
                 queryKeys.admin.users,
             );
             const usersUpdater = usersCall?.[1] as
-                | ((users: Array<{id: number; isActive: boolean}>) => Array<{id: number; isActive: boolean}>)
+                | ((
+                      users: Array<{id: number; isActive: boolean}>,
+                  ) => Array<{id: number; isActive: boolean}>)
                 | undefined;
             expect(
                 usersUpdater?.([
@@ -177,7 +193,9 @@ describe("useAdminMutations", () => {
 
         it("shows error toast when disable fails", async () => {
             const disableUser = vi.fn().mockRejectedValue(new Error("fail"));
-            const wrapper = createWrapper({adminUsersService: {disableUser} as any});
+            const wrapper = createWrapper({
+                adminUsersService: {disableUser} as any,
+            });
             const {result} = renderHook(() => useAdminDisableUser(), {wrapper});
 
             await act(async () => {
@@ -198,7 +216,9 @@ describe("useAdminMutations", () => {
                 .spyOn(queryClient, "invalidateQueries")
                 .mockResolvedValue(undefined);
             const enableUser = vi.fn().mockResolvedValue(undefined);
-            const wrapper = createWrapper({adminUsersService: {enableUser} as any});
+            const wrapper = createWrapper({
+                adminUsersService: {enableUser} as any,
+            });
             const {result} = renderHook(() => useAdminEnableUser(), {wrapper});
 
             await act(async () => {
@@ -213,7 +233,9 @@ describe("useAdminMutations", () => {
                 queryKeys.admin.users,
             );
             const usersUpdater = usersCall?.[1] as
-                | ((users: Array<{id: number; isActive: boolean}>) => Array<{id: number; isActive: boolean}>)
+                | ((
+                      users: Array<{id: number; isActive: boolean}>,
+                  ) => Array<{id: number; isActive: boolean}>)
                 | undefined;
             expect(
                 usersUpdater?.([
@@ -234,7 +256,9 @@ describe("useAdminMutations", () => {
 
         it("shows error toast when enable fails", async () => {
             const enableUser = vi.fn().mockRejectedValue(new Error("fail"));
-            const wrapper = createWrapper({adminUsersService: {enableUser} as any});
+            const wrapper = createWrapper({
+                adminUsersService: {enableUser} as any,
+            });
             const {result} = renderHook(() => useAdminEnableUser(), {wrapper});
 
             await act(async () => {
@@ -254,7 +278,9 @@ describe("useAdminMutations", () => {
                 .spyOn(queryClient, "invalidateQueries")
                 .mockResolvedValue(undefined);
             const promoteUser = vi.fn().mockResolvedValue(undefined);
-            const wrapper = createWrapper({adminUsersService: {promoteUser} as any});
+            const wrapper = createWrapper({
+                adminUsersService: {promoteUser} as any,
+            });
             const {result} = renderHook(() => useAdminChangeRole(), {wrapper});
 
             await act(async () => {
@@ -276,7 +302,9 @@ describe("useAdminMutations", () => {
                 .spyOn(queryClient, "invalidateQueries")
                 .mockResolvedValue(undefined);
             const demoteUser = vi.fn().mockResolvedValue(undefined);
-            const wrapper = createWrapper({adminUsersService: {demoteUser} as any});
+            const wrapper = createWrapper({
+                adminUsersService: {demoteUser} as any,
+            });
             const {result} = renderHook(() => useAdminChangeRole(), {wrapper});
 
             await act(async () => {
@@ -295,7 +323,9 @@ describe("useAdminMutations", () => {
 
         it("shows error toast when role change fails", async () => {
             const promoteUser = vi.fn().mockRejectedValue(new Error("fail"));
-            const wrapper = createWrapper({adminUsersService: {promoteUser} as any});
+            const wrapper = createWrapper({
+                adminUsersService: {promoteUser} as any,
+            });
             const {result} = renderHook(() => useAdminChangeRole(), {wrapper});
 
             await act(async () => {

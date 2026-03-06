@@ -43,6 +43,8 @@ describe("SelectInputGroup", () => {
 
     it("renders with the select trigger", () => {
         render(<SelectInputGroup label="Select" onValueChange={vi.fn()} />);
-        expect(screen.getByRole("combobox", {name: "Select"})).toBeInTheDocument();
+        expect(
+            screen.getByRole("combobox", {name: "Select"}),
+        ).toBeInTheDocument();
     });
 });

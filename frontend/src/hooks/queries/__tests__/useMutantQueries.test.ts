@@ -50,7 +50,9 @@ describe("useProjectMutants", () => {
 
     it("surfaces mutants list query errors", async () => {
         localStorage.setItem("auth_token", "test-token");
-        const listProjectMutants = vi.fn().mockRejectedValue(new Error("failed"));
+        const listProjectMutants = vi
+            .fn()
+            .mockRejectedValue(new Error("failed"));
         const wrapper = createWrapper({
             mutantsService: {listProjectMutants} as any,
         });
@@ -74,7 +76,9 @@ describe("useMutantDetails", () => {
 
     it("fetches mutant details for valid mutant id", async () => {
         localStorage.setItem("auth_token", "test-token");
-        const getMutant = vi.fn().mockResolvedValue({id: 1, status: "SURVIVED"});
+        const getMutant = vi
+            .fn()
+            .mockResolvedValue({id: 1, status: "SURVIVED"});
         const wrapper = createWrapper({mutantsService: {getMutant} as any});
         const {result} = renderHook(() => useMutantDetails(1), {wrapper});
 
@@ -147,7 +151,9 @@ describe("useMutantSourceCode", () => {
 
     it("surfaces source code query errors", async () => {
         localStorage.setItem("auth_token", "test-token");
-        const getMutantSourceCode = vi.fn().mockRejectedValue(new Error("failed"));
+        const getMutantSourceCode = vi
+            .fn()
+            .mockRejectedValue(new Error("failed"));
         const wrapper = createWrapper({
             mutantsService: {getMutantSourceCode} as any,
         });

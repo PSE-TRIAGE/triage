@@ -14,7 +14,9 @@ describe("useAdminUsers", () => {
 
     it("fetches admin users when auth token exists", async () => {
         localStorage.setItem("auth_token", "test-token");
-        const listUsers = vi.fn().mockResolvedValue([{id: 1, username: "admin"}]);
+        const listUsers = vi
+            .fn()
+            .mockResolvedValue([{id: 1, username: "admin"}]);
         const wrapper = createWrapper({adminUsersService: {listUsers} as any});
         const {result} = renderHook(() => useAdminUsers(), {wrapper});
 
@@ -79,7 +81,9 @@ describe("useAdminProjects", () => {
 
     it("surfaces admin projects query errors", async () => {
         localStorage.setItem("auth_token", "test-token");
-        const listAdminProjects = vi.fn().mockRejectedValue(new Error("failed"));
+        const listAdminProjects = vi
+            .fn()
+            .mockRejectedValue(new Error("failed"));
         const wrapper = createWrapper({
             projectsService: {listAdminProjects} as any,
         });
@@ -130,10 +134,9 @@ describe("useAdminUserProjects", () => {
         const wrapper = createWrapper({
             adminUsersService: {listUserProjects} as any,
         });
-        const {result} = renderHook(
-            () => useAdminUserProjects(Number.NaN),
-            {wrapper},
-        );
+        const {result} = renderHook(() => useAdminUserProjects(Number.NaN), {
+            wrapper,
+        });
 
         expect(result.current.fetchStatus).toBe("idle");
         expect(listUserProjects).not.toHaveBeenCalled();

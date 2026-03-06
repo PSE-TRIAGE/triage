@@ -69,6 +69,8 @@ describe("useSubmitRating", () => {
 
         await waitFor(() => expect(result.current.isError).toBe(true));
         expect(invalidateQueriesSpy).not.toHaveBeenCalled();
-        expect(mocks.toastError).toHaveBeenCalledWith("Failed to submit rating");
+        expect(mocks.toastError).toHaveBeenCalledWith(
+            "Failed to submit rating",
+        );
     });
 });

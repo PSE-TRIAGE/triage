@@ -71,7 +71,9 @@ describe("useFormFieldMutations", () => {
         });
 
         it("shows error toast when create form field fails", async () => {
-            const createFormField = vi.fn().mockRejectedValue(new Error("fail"));
+            const createFormField = vi
+                .fn()
+                .mockRejectedValue(new Error("fail"));
             const wrapper = createWrapper({
                 adminFormFieldService: {createFormField} as any,
             });
@@ -117,7 +119,9 @@ describe("useFormFieldMutations", () => {
             );
             expect(fieldsCall).toBeDefined();
             const fieldsUpdater = fieldsCall?.[1] as
-                | ((fields: Array<{id: number; label: string}>) => Array<{id: number; label: string}>)
+                | ((
+                      fields: Array<{id: number; label: string}>,
+                  ) => Array<{id: number; label: string}>)
                 | undefined;
             expect(
                 fieldsUpdater?.([
@@ -135,7 +139,9 @@ describe("useFormFieldMutations", () => {
         });
 
         it("shows error toast when delete form field fails", async () => {
-            const deleteFormField = vi.fn().mockRejectedValue(new Error("fail"));
+            const deleteFormField = vi
+                .fn()
+                .mockRejectedValue(new Error("fail"));
             const wrapper = createWrapper({
                 adminFormFieldService: {deleteFormField} as any,
             });
@@ -183,7 +189,9 @@ describe("useFormFieldMutations", () => {
         });
 
         it("shows error toast when update form field fails", async () => {
-            const updateFormField = vi.fn().mockRejectedValue(new Error("fail"));
+            const updateFormField = vi
+                .fn()
+                .mockRejectedValue(new Error("fail"));
             const wrapper = createWrapper({
                 adminFormFieldService: {updateFormField} as any,
             });
@@ -228,7 +236,9 @@ describe("useFormFieldMutations", () => {
             const wrapper = createWrapper({
                 adminFormFieldService: {reorderFormFields} as any,
             });
-            const {result} = renderHook(() => useReorderFormFields(1), {wrapper});
+            const {result} = renderHook(() => useReorderFormFields(1), {
+                wrapper,
+            });
 
             await act(async () => {
                 result.current.mutate([2, 1]);
@@ -246,11 +256,15 @@ describe("useFormFieldMutations", () => {
             const invalidateQueriesSpy = vi
                 .spyOn(queryClient, "invalidateQueries")
                 .mockResolvedValue(undefined);
-            const reorderFormFields = vi.fn().mockRejectedValue(new Error("fail"));
+            const reorderFormFields = vi
+                .fn()
+                .mockRejectedValue(new Error("fail"));
             const wrapper = createWrapper({
                 adminFormFieldService: {reorderFormFields} as any,
             });
-            const {result} = renderHook(() => useReorderFormFields(1), {wrapper});
+            const {result} = renderHook(() => useReorderFormFields(1), {
+                wrapper,
+            });
 
             await act(async () => {
                 result.current.mutate([2, 1]);

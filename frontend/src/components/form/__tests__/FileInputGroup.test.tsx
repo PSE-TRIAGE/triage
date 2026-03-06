@@ -42,7 +42,9 @@ describe("FileInputGroup", () => {
         fireEvent.change(input, {target: {files: [file]}});
 
         expect(screen.getByText("report.pdf")).toBeInTheDocument();
-        expect(screen.queryByText("Click to Upload File")).not.toBeInTheDocument();
+        expect(
+            screen.queryByText("Click to Upload File"),
+        ).not.toBeInTheDocument();
     });
 
     it("calls provided onChange when file changes", () => {

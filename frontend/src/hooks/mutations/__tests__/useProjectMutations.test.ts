@@ -63,7 +63,9 @@ describe("useProjectMutations", () => {
                 .spyOn(queryClient, "invalidateQueries")
                 .mockResolvedValue(undefined);
             const createProject = vi.fn().mockResolvedValue({id: 1});
-            const wrapper = createWrapper({projectsService: {createProject} as any});
+            const wrapper = createWrapper({
+                projectsService: {createProject} as any,
+            });
             const {result} = renderHook(() => useCreateProject(), {wrapper});
             const file = new File(["xml"], "mutations.xml", {
                 type: "application/xml",
@@ -93,9 +95,14 @@ describe("useProjectMutations", () => {
         });
 
         it("surfaces creation error without clearing store", async () => {
-            const invalidateQueriesSpy = vi.spyOn(queryClient, "invalidateQueries");
+            const invalidateQueriesSpy = vi.spyOn(
+                queryClient,
+                "invalidateQueries",
+            );
             const createProject = vi.fn().mockRejectedValue(new Error("fail"));
-            const wrapper = createWrapper({projectsService: {createProject} as any});
+            const wrapper = createWrapper({
+                projectsService: {createProject} as any,
+            });
             const {result} = renderHook(() => useCreateProject(), {wrapper});
             const file = new File(["xml"], "mutations.xml", {
                 type: "application/xml",
@@ -120,7 +127,9 @@ describe("useProjectMutations", () => {
                 .spyOn(queryClient, "invalidateQueries")
                 .mockResolvedValue(undefined);
             const deleteProject = vi.fn().mockResolvedValue(undefined);
-            const wrapper = createWrapper({projectsService: {deleteProject} as any});
+            const wrapper = createWrapper({
+                projectsService: {deleteProject} as any,
+            });
             const {result} = renderHook(() => useDeleteProject(), {wrapper});
 
             await act(async () => {
@@ -136,7 +145,9 @@ describe("useProjectMutations", () => {
             );
             expect(projectsCall).toBeDefined();
             const projectsUpdater = projectsCall?.[1] as
-                | ((projects: Array<{id: number; name: string}>) => Array<{id: number; name: string}>)
+                | ((
+                      projects: Array<{id: number; name: string}>,
+                  ) => Array<{id: number; name: string}>)
                 | undefined;
             expect(
                 projectsUpdater?.([
@@ -162,9 +173,14 @@ describe("useProjectMutations", () => {
 
         it("shows error toast when delete fails", async () => {
             const setQueryDataSpy = vi.spyOn(queryClient, "setQueryData");
-            const invalidateQueriesSpy = vi.spyOn(queryClient, "invalidateQueries");
+            const invalidateQueriesSpy = vi.spyOn(
+                queryClient,
+                "invalidateQueries",
+            );
             const deleteProject = vi.fn().mockRejectedValue(new Error("fail"));
-            const wrapper = createWrapper({projectsService: {deleteProject} as any});
+            const wrapper = createWrapper({
+                projectsService: {deleteProject} as any,
+            });
             const {result} = renderHook(() => useDeleteProject(), {wrapper});
 
             await act(async () => {
@@ -187,7 +203,9 @@ describe("useProjectMutations", () => {
             const renameProject = vi
                 .fn()
                 .mockResolvedValue({id: 1, name: "Renamed"});
-            const wrapper = createWrapper({projectsService: {renameProject} as any});
+            const wrapper = createWrapper({
+                projectsService: {renameProject} as any,
+            });
             const {result} = renderHook(() => useRenameProject(), {wrapper});
 
             await act(async () => {
@@ -203,7 +221,9 @@ describe("useProjectMutations", () => {
             );
             expect(projectsCall).toBeDefined();
             const projectsUpdater = projectsCall?.[1] as
-                | ((projects: Array<{id: number; name: string}>) => Array<{id: number; name: string}>)
+                | ((
+                      projects: Array<{id: number; name: string}>,
+                  ) => Array<{id: number; name: string}>)
                 | undefined;
             expect(
                 projectsUpdater?.([
@@ -231,7 +251,9 @@ describe("useProjectMutations", () => {
         it("does not patch cache when rename fails", async () => {
             const setQueryDataSpy = vi.spyOn(queryClient, "setQueryData");
             const renameProject = vi.fn().mockRejectedValue(new Error("fail"));
-            const wrapper = createWrapper({projectsService: {renameProject} as any});
+            const wrapper = createWrapper({
+                projectsService: {renameProject} as any,
+            });
             const {result} = renderHook(() => useRenameProject(), {wrapper});
 
             await act(async () => {
@@ -271,7 +293,9 @@ describe("useProjectMutations", () => {
             );
             expect(usersCall).toBeDefined();
             const usersUpdater = usersCall?.[1] as
-                | ((users: Array<{id: number; username: string}>) => Array<{id: number; username: string}>)
+                | ((
+                      users: Array<{id: number; username: string}>,
+                  ) => Array<{id: number; username: string}>)
                 | undefined;
             expect(usersUpdater?.([])).toEqual([
                 {id: 2, username: "john", isAdmin: false, isActive: true},
@@ -306,7 +330,9 @@ describe("useProjectMutations", () => {
                 queryKeys.projects.users(1),
             );
             const usersUpdater = usersCall?.[1] as
-                | ((users: Array<{id: number; username: string}>) => Array<{id: number; username: string}>)
+                | ((
+                      users: Array<{id: number; username: string}>,
+                  ) => Array<{id: number; username: string}>)
                 | undefined;
             expect(usersUpdater?.([{id: 2, username: "john"}])).toEqual([
                 {id: 2, username: "john"},
@@ -348,7 +374,9 @@ describe("useProjectMutations", () => {
             const wrapper = createWrapper({
                 projectsService: {removeUserFromProject} as any,
             });
-            const {result} = renderHook(() => useRemoveProjectUser(1), {wrapper});
+            const {result} = renderHook(() => useRemoveProjectUser(1), {
+                wrapper,
+            });
 
             await act(async () => {
                 result.current.mutate(2);
@@ -363,7 +391,9 @@ describe("useProjectMutations", () => {
             );
             expect(usersCall).toBeDefined();
             const usersUpdater = usersCall?.[1] as
-                | ((users: Array<{id: number; username: string}>) => Array<{id: number; username: string}>)
+                | ((
+                      users: Array<{id: number; username: string}>,
+                  ) => Array<{id: number; username: string}>)
                 | undefined;
             expect(
                 usersUpdater?.([

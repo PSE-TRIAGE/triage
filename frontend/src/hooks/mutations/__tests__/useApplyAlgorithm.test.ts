@@ -16,7 +16,9 @@ describe("useApplyAlgorithm", () => {
             .spyOn(QueryClient.prototype, "invalidateQueries")
             .mockResolvedValue(undefined);
         const applyAlgorithm = vi.fn().mockResolvedValue(undefined);
-        const wrapper = createWrapper({algorithmsService: {applyAlgorithm} as any});
+        const wrapper = createWrapper({
+            algorithmsService: {applyAlgorithm} as any,
+        });
         const {result} = renderHook(() => useApplyAlgorithm(1), {wrapper});
 
         await act(async () => {
@@ -36,7 +38,9 @@ describe("useApplyAlgorithm", () => {
             "invalidateQueries",
         );
         const applyAlgorithm = vi.fn().mockRejectedValue(new Error("fail"));
-        const wrapper = createWrapper({algorithmsService: {applyAlgorithm} as any});
+        const wrapper = createWrapper({
+            algorithmsService: {applyAlgorithm} as any,
+        });
         const {result} = renderHook(() => useApplyAlgorithm(1), {wrapper});
 
         await act(async () => {
