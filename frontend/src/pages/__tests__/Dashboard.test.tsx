@@ -1,7 +1,7 @@
-import {beforeEach, describe, expect, it, vi} from "vitest";
 import {fireEvent, screen} from "@testing-library/react";
-import {Dashboard} from "../Dashboard";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 import {renderWithProviders} from "@/test-utils";
+import {Dashboard} from "../Dashboard";
 
 vi.mock("@tanstack/react-router", () => ({
     useNavigate: () => vi.fn(),

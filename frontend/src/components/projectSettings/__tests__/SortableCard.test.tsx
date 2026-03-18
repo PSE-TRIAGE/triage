@@ -1,7 +1,7 @@
-import {describe, expect, it, vi} from "vitest";
 import {screen} from "@testing-library/react";
-import {SortableCard} from "../SortableCard";
+import {describe, expect, it, vi} from "vitest";
 import {renderWithProviders} from "@/test-utils";
+import {SortableCard} from "../SortableCard";
 
 vi.mock("@dnd-kit/sortable", () => ({
     useSortable: () => ({

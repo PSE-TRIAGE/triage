@@ -1,21 +1,21 @@
-import {describe, expect, it} from "vitest";
 import {render, screen} from "@testing-library/react";
+import {describe, expect, it} from "vitest";
 import {
     DropdownMenu,
-    DropdownMenuTrigger,
+    DropdownMenuCheckboxItem,
     DropdownMenuContent,
+    DropdownMenuGroup,
     DropdownMenuItem,
     DropdownMenuLabel,
-    DropdownMenuSeparator,
-    DropdownMenuShortcut,
-    DropdownMenuGroup,
-    DropdownMenuCheckboxItem,
+    DropdownMenuPortal,
     DropdownMenuRadioGroup,
     DropdownMenuRadioItem,
+    DropdownMenuSeparator,
+    DropdownMenuShortcut,
     DropdownMenuSub,
-    DropdownMenuSubTrigger,
     DropdownMenuSubContent,
-    DropdownMenuPortal,
+    DropdownMenuSubTrigger,
+    DropdownMenuTrigger,
 } from "../dropdown-menu";
 
 describe("DropdownMenu", () => {

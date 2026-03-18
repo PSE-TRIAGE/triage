@@ -1,7 +1,8 @@
-import {describe, expect, it, vi} from "vitest";
 import {screen} from "@testing-library/react";
-import {FormBuilderTab} from "../FormBuilderTab";
+import type {PropsWithChildren} from "react";
+import {describe, expect, it, vi} from "vitest";
 import {renderWithProviders} from "@/test-utils";
+import {FormBuilderTab} from "../FormBuilderTab";
 
 vi.mock("@tanstack/react-router", () => ({
     useRouteContext: () => ({project: {id: 1, name: "Test Project"}}),
@@ -41,7 +42,7 @@ vi.mock("@/hooks/mutations/useFormFieldMutations", () => ({
 
 // Mock dnd-kit to avoid complex DOM interactions
 vi.mock("@dnd-kit/core", () => ({
-    DndContext: ({children}: any) => <div>{children}</div>,
+    DndContext: ({children}: PropsWithChildren) => <div>{children}</div>,
     closestCenter: vi.fn(),
     KeyboardSensor: vi.fn(),
     PointerSensor: vi.fn(),
@@ -50,7 +51,7 @@ vi.mock("@dnd-kit/core", () => ({
 }));
 
 vi.mock("@dnd-kit/sortable", () => ({
-    SortableContext: ({children}: any) => <div>{children}</div>,
+    SortableContext: ({children}: PropsWithChildren) => <div>{children}</div>,
     sortableKeyboardCoordinates: vi.fn(),
     verticalListSortingStrategy: vi.fn(),
     useSortable: () => ({

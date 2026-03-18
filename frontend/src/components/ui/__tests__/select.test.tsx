@@ -1,17 +1,6 @@
-import {describe, expect, it} from "vitest";
 import {render, screen} from "@testing-library/react";
-import {
-    Select,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-    SelectItem,
-    SelectGroup,
-    SelectLabel,
-    SelectSeparator,
-    SelectScrollUpButton,
-    SelectScrollDownButton,
-} from "../select";
+import {describe, expect, it} from "vitest";
+import {Select, SelectTrigger, SelectValue} from "../select";
 
 describe("Select", () => {
     it("renders trigger with placeholder", () => {

@@ -1,16 +1,16 @@
-import {describe, expect, it} from "vitest";
 import {render, screen} from "@testing-library/react";
+import {describe, expect, it} from "vitest";
 import {
     Dialog,
-    DialogTrigger,
-    DialogContent,
-    DialogHeader,
-    DialogFooter,
-    DialogTitle,
-    DialogDescription,
     DialogClose,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
     DialogOverlay,
     DialogPortal,
+    DialogTitle,
+    DialogTrigger,
 } from "../dialog";
 
 describe("Dialog", () => {

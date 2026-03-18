@@ -1,14 +1,14 @@
-import {describe, expect, it} from "vitest";
 import {render, screen} from "@testing-library/react";
+import {describe, expect, it} from "vitest";
 import {
     Table,
-    TableHeader,
     TableBody,
-    TableFooter,
-    TableRow,
-    TableHead,
-    TableCell,
     TableCaption,
+    TableCell,
+    TableFooter,
+    TableHead,
+    TableHeader,
+    TableRow,
 } from "../table";
 
 describe("Table", () => {

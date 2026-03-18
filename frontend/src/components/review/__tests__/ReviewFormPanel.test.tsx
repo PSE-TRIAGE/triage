@@ -1,8 +1,8 @@
-import {describe, expect, it, vi, beforeEach} from "vitest";
 import {screen} from "@testing-library/react";
-import {ReviewFormPanel} from "../ReviewFormPanel";
-import {renderWithProviders} from "@/test-utils";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 import {useMutantStore} from "@/stores/mutantStore";
+import {renderWithProviders} from "@/test-utils";
+import {ReviewFormPanel} from "../ReviewFormPanel";
 
 const mockUseRating = vi.fn();
 vi.mock("@/hooks/queries/useRatingQueries", () => ({

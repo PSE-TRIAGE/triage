@@ -1,7 +1,7 @@
 import {fireEvent, screen, waitFor} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
-import {ReactivateUser} from "../ReactivateUser";
 import {renderWithProviders} from "@/test-utils";
+import {ReactivateUser} from "../ReactivateUser";
 
 const useAdminEnableUserMock = vi.fn();
 const mutateAsyncMock = vi.fn();

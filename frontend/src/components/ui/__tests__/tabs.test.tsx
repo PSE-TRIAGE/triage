@@ -1,6 +1,6 @@
-import {describe, expect, it} from "vitest";
 import {render, screen} from "@testing-library/react";
-import {Tabs, TabsList, TabsTrigger, TabsContent} from "../tabs";
+import {describe, expect, it} from "vitest";
+import {Tabs, TabsContent, TabsList, TabsTrigger} from "../tabs";
 
 describe("Tabs", () => {
     it("renders with data-slot attributes", () => {

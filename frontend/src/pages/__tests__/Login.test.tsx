@@ -1,8 +1,8 @@
-import {beforeEach, describe, expect, it, vi} from "vitest";
 import {act, fireEvent, screen, waitFor} from "@testing-library/react";
-import {Login} from "../Login";
-import {renderWithProviders} from "@/test-utils";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 import {ApiError} from "@/api/client";
+import {renderWithProviders} from "@/test-utils";
+import {Login} from "../Login";
 
 vi.mock("@tanstack/react-router", () => ({
     useNavigate: () => vi.fn(),

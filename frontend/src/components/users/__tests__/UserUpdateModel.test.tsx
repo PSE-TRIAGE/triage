@@ -1,7 +1,7 @@
 import {fireEvent, screen, waitFor} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
-import {UserUpdateModel} from "../UserUpdateModel";
 import {renderWithProviders} from "@/test-utils";
+import {UserUpdateModel} from "../UserUpdateModel";
 
 const useCreateProjectMock = vi.fn();
 const toastSuccessMock = vi.fn();
