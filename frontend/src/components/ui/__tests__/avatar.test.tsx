@@ -1,6 +1,6 @@
-import {describe, expect, it} from "vitest";
 import {render, screen} from "@testing-library/react";
-import {Avatar, AvatarImage, AvatarFallback} from "../avatar";
+import {describe, expect, it} from "vitest";
+import {Avatar, AvatarFallback, AvatarImage} from "../avatar";
 
 describe("Avatar", () => {
     it("renders with data-slot attribute", () => {

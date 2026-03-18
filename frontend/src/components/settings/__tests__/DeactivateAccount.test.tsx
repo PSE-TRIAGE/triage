@@ -1,7 +1,7 @@
-import {describe, expect, it, vi} from "vitest";
 import {screen} from "@testing-library/react";
-import {DeactivateAccount} from "../DeactivateAccount";
+import {describe, expect, it, vi} from "vitest";
 import {renderWithProviders} from "@/test-utils";
+import {DeactivateAccount} from "../DeactivateAccount";
 
 vi.mock("@/hooks/mutations/useAuthMutations", () => ({
     useDeactivateAccount: () => ({mutateAsync: vi.fn(), isPending: false}),

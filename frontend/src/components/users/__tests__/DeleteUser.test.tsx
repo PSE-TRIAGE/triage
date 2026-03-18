@@ -1,7 +1,7 @@
 import {fireEvent, screen, waitFor} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
-import {DeleteUser} from "../DeleteUser";
 import {renderWithProviders} from "@/test-utils";
+import {DeleteUser} from "../DeleteUser";
 
 const useAdminDeleteUserMock = vi.fn();
 const useAdminDisableUserMock = vi.fn();

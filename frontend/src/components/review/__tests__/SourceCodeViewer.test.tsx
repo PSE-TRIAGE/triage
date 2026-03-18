@@ -1,8 +1,8 @@
-import {describe, expect, it, vi, beforeEach} from "vitest";
-import {screen, fireEvent} from "@testing-library/react";
-import {SourceCodeViewer} from "../SourceCodeViewer";
-import {renderWithProviders} from "@/test-utils";
+import {fireEvent, screen} from "@testing-library/react";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 import {useMutantStore} from "@/stores/mutantStore";
+import {renderWithProviders} from "@/test-utils";
+import {SourceCodeViewer} from "../SourceCodeViewer";
 
 vi.mock("@/hooks/queries/useMutantQueries", () => ({
     useMutantSourceCode: vi.fn(),

@@ -1,8 +1,8 @@
-import {act, renderHook, waitFor} from "@testing-library/react";
 import {QueryClient} from "@tanstack/react-query";
+import {act, renderHook, waitFor} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
-import {createWrapper} from "@/test-utils";
 import {queryKeys} from "@/lib/queryClient";
+import {createWrapper} from "@/test-utils";
 import {useApplyAlgorithm} from "../useApplyAlgorithm";
 
 describe("useApplyAlgorithm", () => {

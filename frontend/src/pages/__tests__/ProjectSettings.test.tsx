@@ -1,7 +1,7 @@
-import {describe, expect, it, vi} from "vitest";
 import {screen} from "@testing-library/react";
-import {ProjectSettings} from "../ProjectSettings";
+import {describe, expect, it, vi} from "vitest";
 import {renderWithProviders} from "@/test-utils";
+import {ProjectSettings} from "../ProjectSettings";
 
 // Mock all tab components to avoid their dependencies
 vi.mock("@/components/projectSettings/FormBuilderTab", () => ({

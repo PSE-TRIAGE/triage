@@ -1,17 +1,17 @@
-import {describe, expect, it} from "vitest";
 import {render, screen} from "@testing-library/react";
+import {describe, expect, it} from "vitest";
 import {
     AlertDialog,
-    AlertDialogTrigger,
-    AlertDialogContent,
-    AlertDialogHeader,
-    AlertDialogFooter,
-    AlertDialogTitle,
-    AlertDialogDescription,
     AlertDialogAction,
     AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
     AlertDialogOverlay,
     AlertDialogPortal,
+    AlertDialogTitle,
+    AlertDialogTrigger,
 } from "../alert-dialog";
 
 describe("AlertDialog", () => {

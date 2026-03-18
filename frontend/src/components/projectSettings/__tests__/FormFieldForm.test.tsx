@@ -1,7 +1,7 @@
-import {describe, expect, it, vi} from "vitest";
 import {render, screen} from "@testing-library/react";
-import {FormFieldForm} from "../FormFieldForm";
+import {describe, expect, it, vi} from "vitest";
 import {Dialog, DialogContent} from "@/components/ui/dialog";
+import {FormFieldForm} from "../FormFieldForm";
 
 const Wrapper = ({children}: {children: React.ReactNode}) => (
     <Dialog open={true} onOpenChange={() => {}}>

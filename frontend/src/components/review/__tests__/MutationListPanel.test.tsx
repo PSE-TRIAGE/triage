@@ -1,8 +1,8 @@
-import {describe, expect, it, vi, beforeEach} from "vitest";
 import {screen} from "@testing-library/react";
-import {MutationListPanel} from "../MutationListPanel";
-import {renderWithProviders} from "@/test-utils";
+import {beforeEach, describe, expect, it} from "vitest";
 import {useMutantStore} from "@/stores/mutantStore";
+import {renderWithProviders} from "@/test-utils";
+import {MutationListPanel} from "../MutationListPanel";
 
 const mockMutants = [
     {

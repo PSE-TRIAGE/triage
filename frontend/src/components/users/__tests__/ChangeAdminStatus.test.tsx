@@ -1,7 +1,7 @@
 import {fireEvent, screen, waitFor} from "@testing-library/react";
 import {beforeEach, describe, expect, it, vi} from "vitest";
-import {ChangeAdminStatus} from "../ChangeAdminStatus";
 import {renderWithProviders} from "@/test-utils";
+import {ChangeAdminStatus} from "../ChangeAdminStatus";
 
 const useAdminChangeRoleMock = vi.fn();
 const mutateAsyncMock = vi.fn();

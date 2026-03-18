@@ -1,7 +1,7 @@
-import {describe, expect, it, vi} from "vitest";
 import {screen} from "@testing-library/react";
-import {CreateProjectModal} from "../CreateProjectModal";
+import {describe, expect, it, vi} from "vitest";
 import {renderWithProviders} from "@/test-utils";
+import {CreateProjectModal} from "../CreateProjectModal";
 
 vi.mock("@/hooks/mutations/useProjectMutations", () => ({
     useCreateProject: () => ({

@@ -1,7 +1,7 @@
-import {describe, expect, it, vi, beforeEach} from "vitest";
 import {fireEvent, screen, waitFor} from "@testing-library/react";
-import {renderWithProviders} from "@/test-utils";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 import {useMutantStore} from "@/stores/mutantStore";
+import {renderWithProviders} from "@/test-utils";
 
 vi.mock("@/routes/_auth/project/$projectId/review", () => ({
     Route: {

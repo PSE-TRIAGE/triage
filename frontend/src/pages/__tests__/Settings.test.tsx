@@ -1,7 +1,7 @@
-import {beforeEach, describe, expect, it, vi} from "vitest";
 import {fireEvent, screen, waitFor} from "@testing-library/react";
-import {Settings} from "../Settings";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 import {renderWithProviders} from "@/test-utils";
+import {Settings} from "../Settings";
 
 const mockDeactivateAccount = vi.fn();
 const mockChangePassword = vi.fn();

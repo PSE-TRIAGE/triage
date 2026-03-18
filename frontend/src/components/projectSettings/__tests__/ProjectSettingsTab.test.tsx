@@ -1,7 +1,7 @@
-import {describe, expect, it, vi} from "vitest";
 import {screen} from "@testing-library/react";
-import {ProjectSettingsTab} from "../ProjectSettingsTab";
+import {describe, expect, it, vi} from "vitest";
 import {renderWithProviders} from "@/test-utils";
+import {ProjectSettingsTab} from "../ProjectSettingsTab";
 
 vi.mock("@tanstack/react-router", () => ({
     useRouteContext: () => ({project: {id: 1, name: "Test Project"}}),

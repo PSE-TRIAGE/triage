@@ -1,7 +1,7 @@
-import {describe, expect, it, vi, beforeEach} from "vitest";
 import {screen} from "@testing-library/react";
-import {AlgorithmSettingsTab} from "../AlgorithmSettingsTab";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 import {renderWithProviders} from "@/test-utils";
+import {AlgorithmSettingsTab} from "../AlgorithmSettingsTab";
 
 vi.mock("@tanstack/react-router", () => ({
     useRouteContext: () => ({project: {id: 1, name: "Test Project"}}),
@@ -9,7 +9,8 @@ vi.mock("@tanstack/react-router", () => ({
 
 const mockUseAlgorithms = vi.fn();
 vi.mock("@/hooks/queries/useAlgorithms", () => ({
-    useAlgorithms: (...args: any[]) => mockUseAlgorithms(...args),
+    useAlgorithms: (...args: Parameters<typeof mockUseAlgorithms>) =>
+        mockUseAlgorithms(...args),
 }));
 
 vi.mock("@/hooks/mutations/useApplyAlgorithm", () => ({

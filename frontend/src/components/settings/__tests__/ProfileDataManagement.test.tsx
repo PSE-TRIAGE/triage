@@ -1,7 +1,7 @@
-import {describe, expect, it, vi} from "vitest";
 import {screen} from "@testing-library/react";
-import {ProfileDataManagement} from "../ProfileDataManagement";
+import {describe, expect, it, vi} from "vitest";
 import {renderWithProviders} from "@/test-utils";
+import {ProfileDataManagement} from "../ProfileDataManagement";
 
 vi.mock("@/hooks/mutations/useAuthMutations", () => ({
     useChangePassword: () => ({mutateAsync: vi.fn(), isPending: false}),

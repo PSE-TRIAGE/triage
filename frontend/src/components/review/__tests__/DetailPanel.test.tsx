@@ -1,8 +1,8 @@
-import {describe, expect, it, vi} from "vitest";
 import {screen} from "@testing-library/react";
-import {DetailPanel} from "../DetailPanel";
-import {renderWithProviders} from "@/test-utils";
+import {describe, expect, it, vi} from "vitest";
 import {useMutantStore} from "@/stores/mutantStore";
+import {renderWithProviders} from "@/test-utils";
+import {DetailPanel} from "../DetailPanel";
 
 vi.mock("@/hooks/queries/useMutantQueries", () => ({
     useMutantDetails: () => ({data: null}),

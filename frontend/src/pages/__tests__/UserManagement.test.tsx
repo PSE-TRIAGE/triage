@@ -1,7 +1,7 @@
-import {describe, expect, it, vi, beforeEach} from "vitest";
 import {fireEvent, screen} from "@testing-library/react";
-import {UserManagement} from "../UserManagement";
+import {beforeEach, describe, expect, it, vi} from "vitest";
 import {renderWithProviders} from "@/test-utils";
+import {UserManagement} from "../UserManagement";
 
 vi.mock("@tanstack/react-router", () => ({
     useNavigate: () => vi.fn(),
@@ -11,9 +11,13 @@ const mockUseAdminUsers = vi.fn();
 const mockUseAdminProjects = vi.fn();
 const mockUseAdminUserProjects = vi.fn();
 vi.mock("@/hooks/queries/useAdminQueries", () => ({
-    useAdminUsers: (...args: any[]) => mockUseAdminUsers(...args),
-    useAdminProjects: (...args: any[]) => mockUseAdminProjects(...args),
-    useAdminUserProjects: (...args: any[]) => mockUseAdminUserProjects(...args),
+    useAdminUsers: (...args: Parameters<typeof mockUseAdminUsers>) =>
+        mockUseAdminUsers(...args),
+    useAdminProjects: (...args: Parameters<typeof mockUseAdminProjects>) =>
+        mockUseAdminProjects(...args),
+    useAdminUserProjects: (
+        ...args: Parameters<typeof mockUseAdminUserProjects>
+    ) => mockUseAdminUserProjects(...args),
 }));
 
 vi.mock("@/hooks/queries/useUserQueries", () => ({
