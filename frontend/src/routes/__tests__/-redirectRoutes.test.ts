@@ -5,7 +5,7 @@ import {Route as ProjectIndexRoute} from "../_auth/project/$projectId/index";
 describe("redirect-only routes", () => {
     it("redirects /_auth/ to /dashboard", async () => {
         await expect(
-            (async () => AuthIndexRoute.options.beforeLoad?.())(),
+            (async () => AuthIndexRoute.options.beforeLoad?.({} as never))(),
         ).rejects.toMatchObject({
             options: {to: "/dashboard"},
         });
@@ -13,7 +13,7 @@ describe("redirect-only routes", () => {
 
     it("redirects /_auth/project/$projectId/ to /dashboard with replace", async () => {
         await expect(
-            (async () => ProjectIndexRoute.options.beforeLoad?.())(),
+            (async () => ProjectIndexRoute.options.beforeLoad?.({} as never))(),
         ).rejects.toMatchObject({
             options: {
                 to: "/dashboard",

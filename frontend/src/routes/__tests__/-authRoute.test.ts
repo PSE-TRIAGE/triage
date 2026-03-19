@@ -55,7 +55,9 @@ describe("routes/_auth beforeLoad", () => {
     it("redirects to /login when auth_token is missing", async () => {
         const {Route, ensureQueryDataMock} = await loadAuthRoute();
 
-        await expect(Route.options.beforeLoad?.()).rejects.toMatchObject({
+        await expect(
+            Route.options.beforeLoad?.({} as never),
+        ).rejects.toMatchObject({
             options: {to: "/login"},
         });
         expect(ensureQueryDataMock).not.toHaveBeenCalled();
@@ -66,7 +68,9 @@ describe("routes/_auth beforeLoad", () => {
         const {Route, queryKeysMock, ensureQueryDataMock, meMock} =
             await loadAuthRoute();
 
-        await expect(Route.options.beforeLoad?.()).resolves.toBeUndefined();
+        await expect(
+            Route.options.beforeLoad?.({} as never),
+        ).resolves.toBeUndefined();
         expect(ensureQueryDataMock).toHaveBeenCalledWith(
             expect.objectContaining({
                 queryKey: queryKeysMock.auth.me,
@@ -82,6 +86,8 @@ describe("routes/_auth beforeLoad", () => {
         const authError = new Error("me query failed");
         meMock.mockRejectedValueOnce(authError);
 
-        await expect(Route.options.beforeLoad?.()).rejects.toBe(authError);
+        await expect(Route.options.beforeLoad?.({} as never)).rejects.toBe(
+            authError,
+        );
     });
 });
