@@ -121,14 +121,14 @@ describe("useAuthMutations", () => {
 
             await act(async () => {
                 result.current.mutate({
-                    old_password: "old",
+                    current_password: "old",
                     new_password: "new",
                 });
             });
 
             await waitFor(() => expect(result.current.isSuccess).toBe(true));
             expect(changePassword).toHaveBeenCalledWith({
-                old_password: "old",
+                current_password: "old",
                 new_password: "new",
             });
         });
@@ -142,7 +142,7 @@ describe("useAuthMutations", () => {
 
             await act(async () => {
                 result.current.mutate({
-                    old_password: "old",
+                    current_password: "old",
                     new_password: "new",
                 });
             });

@@ -19,7 +19,7 @@ vi.mock("prism-react-renderer", () => ({
             tokens: code
                 .split("\n")
                 .map((line: string) => [{content: line, types: ["plain"]}]),
-            getLineProps: ({line}: any) => ({}),
+            getLineProps: (_lineProps: any) => ({}),
             getTokenProps: ({token}: any) => ({children: token.content}),
         }),
     themes: {nightOwl: {plain: {}}, github: {plain: {}}},
