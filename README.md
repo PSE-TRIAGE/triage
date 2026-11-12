@@ -2,7 +2,7 @@
 
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Docker](https://img.shields.io/badge/deployment-docker-2496ED.svg?logo=docker&logoColor=white)
-![Status](https://img.shields.io/badge/status-active-success.svg)
+![Status](https://img.shields.io/badge/status-completed-blue.svg)
 
 **Triage** is a three-tier web application developed for the "Praxis der Softwareentwicklung" (PSE) course at KIT. It addresses the signal-to-noise ratio problem in mutation testing by providing a centralized platform to ingest, analyze, and prioritize mutants for manual review.
 
